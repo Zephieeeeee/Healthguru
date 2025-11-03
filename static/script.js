@@ -70,8 +70,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (themeToggle) {
         // Apply saved theme on page load 
         if (localStorage.getItem(THEME_KEY) === 'light') {
-            // If the user prefers light mode, we can add a class
-            // (You'd need to add '.light-theme' CSS rules to your stylesheet)
             body.classList.add('light-theme');
         }
 
