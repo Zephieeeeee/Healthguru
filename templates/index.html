@@ -3,346 +3,367 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HealthGuru: Your AI Wellness Companion</title>
+    <title>Healthguru: AI Wellness Companion</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- PROFESSIONAL DARK MODE STYLES --- */
-        
-        /* Body: Soft Black Background */
+        /* Custom styles for dark theme and responsiveness */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #121212; /* Cod Gray: Professional Dark Mode Background */
-            color: #e0e0e6; /* Off-white for comfortable reading */
-            height: 100vh;
-            margin: 0;
-            overflow: hidden; 
+            background-color: #121212; /* Dark background */
+            color: #e0e0e0; /* Light text */
+            overflow-x: hidden; /* Prevent horizontal scrolling */
         }
-        
-        /* Main Layout */
-        #app-container {
-            display: flex;
+        .message-bubble-user {
+            background-color: #2a3d66; /* Deep blue for user messages */
+            color: #ffffff;
+            border-radius: 1rem 1rem 0.25rem 1rem;
+            max-width: 90%; /* Responsive width */
+            margin-left: auto; /* Push to the right */
+        }
+        .message-bubble-ai {
+            background-color: #1e1e1e; /* Darker grey for AI messages */
+            color: #e0e0e0;
+            border-radius: 1rem 1rem 1rem 0.25rem;
+            max-width: 90%; /* Responsive width */
+            margin-right: auto; /* Push to the left */
+            border: 1px solid #333;
+        }
+
+        /* Sidebar Styling (History Panel) */
+        #history-sidebar {
+            width: 300px; /* Fixed desktop width */
+            background-color: #1f1f1f; /* Slightly lighter than body */
+            transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
+            position: fixed; /* Fixed position */
+            top: 0;
+            left: 0;
             height: 100%;
+            z-index: 20;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+            /* Initially visible on desktop */
         }
-
-        /* Sidebar Styling */
-        #sidebar {
-            width: 280px;
-            min-width: 280px;
-            background-color: #1a1a1a; /* Slightly lighter than main body for depth */
-            color: #e0e0e6;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid #333333;
-            transition: all 0.3s ease;
-            position: relative;
-            z-index: 10;
-        }
-
-        /* Main Chat Area */
+        
+        /* Main Content Area */
         #main-content {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            background-color: #121212; 
+            margin-left: 300px; /* Offset by sidebar width on desktop */
+            transition: margin-left 0.3s ease-in-out;
+            min-height: 100vh;
+            padding-top: 1rem; /* Space for the header */
         }
 
-        /* Chat Header */
-        #chat-header {
-            padding: 1rem 2rem;
-            border-bottom: 1px solid #333333;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        /* Hidden State for Sidebar (Applied by JS) */
+        #history-sidebar.hidden-mobile {
+            transform: translateX(-300px);
         }
 
-        /* Chat Box (Scrollable Message Area) */
-        #chat-box {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 2rem;
-            padding-bottom: 90px;
+        /* Shift content when sidebar is hidden */
+        .sidebar-collapsed #main-content {
+            margin-left: 0;
         }
 
-        /* Message Styling */
-        .message-container {
-            margin-bottom: 1.5rem;
-            display: flex;
-            justify-content: flex-start;
-        }
-
-        .message-container.user {
-            justify-content: flex-end;
-        }
-
-        .message-bubble {
-            max-width: 80%;
-            padding: 14px 18px; /* Slightly larger padding for modern look */
-            border-radius: 20px;
-            line-height: 1.6;
-            font-weight: 400;
-        }
-
-        /* Model Bubble: Base/Input Color */
-        .message-container.model .message-bubble {
-            background-color: #1f1f1f; /* Darker grey, almost black */
-            color: #e0e0e6;
-            border-top-left-radius: 8px; /* Softened corner */
-            border-bottom-left-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-        }
-
-        /* User Bubble: Professional Teal Accent */
-        .message-container.user .message-bubble {
-            background-color: #008080; /* Deep Teal - Professional and Calming */
-            color: white;
-            border-bottom-right-radius: 8px; /* Softened corner */
-            border-top-right-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-        }
-
-        /* Input Area */
-        #input-area {
-            padding: 1rem 2rem;
-            background-color: #121212;
-            position: fixed;
-            bottom: 0;
-            width: calc(100% - 280px); 
-            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.4); /* Stronger shadow to separate from chat */
-            display: flex;
-            align-items: center;
-        }
-        
-        .input-wrapper {
-            background-color: #1a1a1a; /* Matches sidebar for visual continuity */
-            border-radius: 28px; /* More rounded */
-            display: flex;
-            align-items: center;
-            width: 100%;
-            padding: 10px 18px;
-            border: 1px solid #333333; /* Subtle border */
-        }
-
-        #message-input {
-            flex-grow: 1;
-            background: none;
-            border: none;
-            outline: none;
-            color: #e0e0e6;
-            padding: 0 10px;
-            resize: none;
-            min-height: 24px; /* Consistent height */
-            max-height: 150px;
-            overflow-y: auto;
-            font-size: 1rem;
-        }
-
-        /* Send Button Icon color is Teal */
-        #send-button {
-            background: none;
-            border: none;
-            color: #008080; /* Deep Teal accent */
-            cursor: pointer;
-            padding: 5px;
-            margin-left: 10px;
-            transition: color 0.2s;
-        }
-        
-        #send-button:hover {
-            color: #00cccc; /* Lighter teal on hover */
-        }
-
-        /* Sidebar Elements */
-        .sidebar-item {
-            padding: 10px 20px;
-            margin: 5px 10px;
-            border-radius: 12px; /* Softened corners */
-            cursor: pointer;
-            transition: background-color 0.2s;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #cccccc; /* Slightly desaturated text */
-        }
-
-        .sidebar-item:hover {
-            background-color: #2c2c2c;
-            color: #e0e0e6;
-        }
-        
-        /* New Chat button text/icon color is Teal */
-        .sidebar-new-chat {
-            background-color: #008080; /* Primary Teal background */
-            color: white; 
-            margin: 15px 10px;
-            padding: 12px 20px;
-            font-weight: 600;
-            border-radius: 12px;
-            transition: background-color 0.2s;
-        }
-
-        .sidebar-new-chat:hover {
-            background-color: #009999;
-        }
-        
-        /* HealthGuru Title */
-        .app-title {
-             color: #00cccc; /* Lighter, more vibrant teal for the title */
-             font-weight: 700;
-             letter-spacing: -0.5px;
-        }
-        
-        /* Utility Icons */
-        .icon {
-            width: 20px;
-            height: 20px;
-            stroke-width: 2;
-            fill: none;
-            stroke: currentColor;
-        }
-
-        /* Responsive overrides (Keep this) */
+        /* Mobile Adjustments (Sidebar covers entire screen) */
         @media (max-width: 768px) {
-            #sidebar {
-                position: absolute;
-                height: 100%;
-                transform: translateX(-280px);
+            #history-sidebar {
+                width: 100%; /* Full width on mobile */
+                transform: translateX(-100%); /* Hidden by default on mobile */
             }
-            #sidebar.open {
-                transform: translateX(0);
+            #history-sidebar.active {
+                transform: translateX(0); /* Visible state */
             }
             #main-content {
-                width: 100%;
+                margin-left: 0; /* No offset on mobile */
             }
-            #input-area {
-                width: 100%; 
+            /* Hamburger icon for mobile */
+            #sidebar-toggle-mobile {
+                display: block;
             }
         }
-    </style>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-</head>
-<body>
-    <div id="app-container">
         
-        <div id="sidebar">
-            <div class="p-4 flex justify-between items-center h-16">
-                <h1 class="text-2xl app-title">HealthGuru</h1>
-                <button id="close-sidebar-btn" class="menu-icon md:hidden text-white hover:text-gray-400">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                </button>
-            </div>
-            
-            <a href="{{ url_for('new_chat') }}" class="sidebar-item sidebar-new-chat flex items-center gap-3">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-                Start New Chat
-            </a>
+        /* Desktop/Tablet visibility for the toggle button */
+        #sidebar-toggle-desktop {
+            display: block; /* Visible on desktop/tablet */
+        }
+        @media (max-width: 768px) {
+            /* Hide the desktop toggle button on small screens, use the mobile one */
+            #sidebar-toggle-desktop {
+                display: none;
+            }
+        }
 
-            <div class="flex-grow overflow-y-auto p-2">
-                <h2 class="text-sm font-medium text-gray-500 uppercase px-3 py-2 mt-4 mb-1">Recent Chats</h2>
-                
-                {% if all_history %}
-                    {% for chat_id, chat in all_history %}
-                        <a href="{{ url_for('index', chat_id=chat_id) }}" class="sidebar-item">
-                            <span class="truncate" title="{{ chat.title | default('New Chat') }}">{{ chat.title | default('New Chat') }}</span>
-                        </a>
-                    {% endfor %}
-                {% else %}
-                    <p class="text-xs text-gray-500 px-3 py-2">No recent chats.</p>
-                {% endif %}
-            </div>
+    </style>
+</head>
+<body id="body-container">
 
-            <div class="border-t border-gray-800 p-2">
-                <a href="#" id="theme-toggle" class="sidebar-item">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-                    Settings & Help
-                </a>
-            </div>
-        </div>
-
-        <div id="main-content" class="flex-grow">
-            <div id="chat-header">
-                <button id="open-sidebar-btn" class="menu-icon md:hidden text-white hover:text-gray-400">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-                </button>
-                <h2 class="text-xl font-medium app-title">HealthGuru</h2>
-            </div>
-
-            <div id="chat-box">
-                {% for message in messages %}
-                    <div class="message-container {{ message.role }}">
-                        <div class="message-bubble">
-                            {{ message.parts[0].text | safe }}
-                        </div>
-                    </div>
+    <div id="history-sidebar" class="p-4 flex flex-col hidden-mobile">
+        <h1 class="text-3xl font-bold text-green-400 mb-6">Healthguru</h1>
+        
+        <a href="/new_chat" class="w-full text-center bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md mb-6 transition duration-150 ease-in-out">
+            New Chat
+        </a>
+        
+        <h2 class="text-lg font-semibold text-gray-400 mb-2 border-b border-gray-700 pb-1">Recent</h2>
+        
+        <div class="flex-grow overflow-y-auto">
+            {% if recent_chats %}
+                {% for chat in recent_chats %}
+                    <a href="/chat/{{ chat.id }}" class="block w-full text-left {% if chat.id == current_chat_id %}bg-gray-700{% else %}hover:bg-gray-800{% endif %} py-2 px-3 rounded-lg mb-2 text-sm transition duration-100 ease-in-out">
+                        {{ chat.title }}
+                    </a>
                 {% endfor %}
-            </div>
-
-            <div id="input-area">
-                <form id="chat-form" class="input-wrapper">
-                    <input type="hidden" id="chat-id" value="{{ current_chat_id }}">
-                    <textarea 
-                        id="message-input" 
-                        placeholder="Ask your health or wellness question..." 
-                        rows="1" 
-                        class="block w-full text-lg focus:ring-0 resize-none" 
-                        oninput="adjustHeight(this)" 
-                        onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); document.getElementById('chat-form').dispatchEvent(new Event('submit')); }"
-                    ></textarea>
-                    
-                    <button type="submit" id="send-button" title="Send message">
-                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>
-                        </svg>
-                    </button>
-                </form>
-            </div>
+            {% else %}
+                <p class="text-gray-500 text-sm italic">Start a new chat to see history.</p>
+            {% endif %}
+        </div>
+        
+        <div class="mt-4 pt-4 border-t border-gray-700">
+            <p class="text-sm text-gray-500 hover:text-gray-400 cursor-pointer">Settings & Help</p>
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-    <script>
-        // Adjust textarea height dynamically
-        function adjustHeight(el) {
-            el.style.height = 'auto';
-            el.style.height = (el.scrollHeight) + 'px';
-            const chatBox = document.getElementById('chat-box');
-            if (chatBox) {
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }
-        }
-        
-        // Initial setup on load
-        document.addEventListener('DOMContentLoaded', function() {
-            const input = document.getElementById('message-input');
-            if (input) {
-                adjustHeight(input);
-            }
+    <div id="main-content" class="min-h-screen flex flex-col">
+
+        <header class="flex justify-between items-center p-4 bg-black/50 sticky top-0 z-10 shadow-lg">
             
-            // Function to update the width of the fixed input area
-            function updateInputAreaWidth() {
-                const sidebar = document.getElementById('sidebar');
-                const inputArea = document.getElementById('input-area');
-                if (sidebar && inputArea) {
-                     const sidebarIsVisible = window.innerWidth > 768 || sidebar.classList.contains('open');
-                    
-                    if (sidebarIsVisible && window.innerWidth > 768) {
-                        inputArea.style.width = `calc(100% - ${sidebar.offsetWidth}px)`;
-                        inputArea.style.left = `${sidebar.offsetWidth}px`;
-                    } else {
-                         inputArea.style.width = '100%';
-                         inputArea.style.left = '0';
-                    }
+            <button id="sidebar-toggle-mobile" onclick="toggleSidebar()" class="text-white hover:text-green-400 p-2 rounded-full transition duration-150 ease-in-out" style="display: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+            </button>
+            
+            <h1 class="text-xl font-semibold text-white ml-2">Healthguru: Your AI Wellness Companion</h1>
+            
+            <button id="sidebar-toggle-desktop" onclick="toggleSidebar()" class="text-white hover:text-green-400 p-2 rounded-full transition duration-150 ease-in-out">
+                <svg id="toggle-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
+            
+        </header>
+
+        <div id="chat-window" class="flex-grow p-4 space-y-4 overflow-y-auto max-w-4xl w-full mx-auto">
+            
+            <div class="flex justify-start">
+                <div class="message-bubble-ai p-3">
+                    Hello! I'm Healthguru, an AI trained to offer general health and wellness information. How can I assist you today?
+                </div>
+            </div>
+
+            {% for message in messages %}
+                {% if message.role == 'user' %}
+                    <div class="flex justify-end">
+                        <div class="message-bubble-user p-3">
+                            {{ message.parts[0].text }}
+                        </div>
+                    </div>
+                {% elif message.role == 'model' %}
+                    <div class="flex justify-start">
+                        <div class="message-bubble-ai p-3 whitespace-pre-wrap">
+                            {{ message.parts[0].text }}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+            <div id="loading-indicator" class="flex justify-start hidden">
+                <div class="message-bubble-ai p-3">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse delay-75"></div>
+                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse delay-150"></div>
+                        <span class="text-sm">Healthguru is thinking...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="scroll-anchor"></div>
+        </div>
+
+        <div class="sticky bottom-0 bg-black/80 backdrop-blur-sm p-4 border-t border-gray-800">
+            <div class="max-w-4xl mx-auto flex space-x-3">
+                <input 
+                    type="text" 
+                    id="user-input" 
+                    placeholder="Ask your health question..." 
+                    class="flex-grow p-3 rounded-xl bg-gray-800 text-white border border-gray-700 focus:ring-green-500 focus:border-green-500 transition duration-150 ease-in-out shadow-lg"
+                    onkeypress="if(event.key === 'Enter') { sendMessage(); }"
+                >
+                <button 
+                    onclick="sendMessage()" 
+                    id="send-button"
+                    class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition duration-150 ease-in-out transform hover:scale-105"
+                >
+                    Send
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const chatWindow = document.getElementById('chat-window');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const scrollAnchor = document.getElementById('scroll-anchor');
+        const historySidebar = document.getElementById('history-sidebar');
+        const bodyContainer = document.getElementById('body-container');
+        const mainContent = document.getElementById('main-content');
+        const toggleIcon = document.getElementById('toggle-icon');
+
+        // Initial check for mobile size to set initial state of the sidebar
+        let isMobile = window.innerWidth <= 768;
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            // Check for a saved state or initialize based on screen size
+            if (isMobile) {
+                // On mobile, the sidebar starts hidden
+                historySidebar.classList.add('hidden-mobile');
+            } else {
+                // On desktop, ensure the sidebar is visible and body has margin
+                historySidebar.classList.remove('hidden-mobile');
+                bodyContainer.classList.remove('sidebar-collapsed');
+                toggleIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />`; // Chevron Left
+            }
+            scrollToBottom();
+        });
+
+
+        window.addEventListener('resize', () => {
+            const wasMobile = isMobile;
+            isMobile = window.innerWidth <= 768;
+
+            // Adjust layout if screen crosses the mobile breakpoint
+            if (wasMobile !== isMobile) {
+                if (!isMobile) {
+                    // Transitioning to Desktop: Ensure sidebar is open
+                    historySidebar.classList.remove('active');
+                    historySidebar.classList.remove('hidden-mobile');
+                    bodyContainer.classList.remove('sidebar-collapsed');
+                    toggleIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />`; // Chevron Left
+                } else {
+                    // Transitioning to Mobile: Ensure sidebar is hidden by default
+                    historySidebar.classList.remove('active');
+                    historySidebar.classList.add('hidden-mobile');
+                    bodyContainer.classList.remove('sidebar-collapsed'); // Always remove on mobile resize
                 }
             }
-            window.addEventListener('resize', updateInputAreaWidth);
-            setTimeout(updateInputAreaWidth, 100); 
-            
-            const chatBox = document.getElementById('chat-box');
-            if (chatBox) {
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }
         });
+
+
+        function toggleSidebar() {
+            if (isMobile) {
+                // Mobile: Toggle the 'active' class (full-screen overlay)
+                historySidebar.classList.toggle('active');
+            } else {
+                // Desktop: Toggle the 'sidebar-collapsed' class on the body (shifts main content)
+                bodyContainer.classList.toggle('sidebar-collapsed');
+                
+                // Update the toggle icon
+                if (bodyContainer.classList.contains('sidebar-collapsed')) {
+                    // Sidebar is hidden -> show chevron right
+                    historySidebar.classList.add('hidden-mobile');
+                    mainContent.style.marginLeft = '0px';
+                    toggleIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />`; // Chevron Right
+                } else {
+                    // Sidebar is visible -> show chevron left
+                    historySidebar.classList.remove('hidden-mobile');
+                    mainContent.style.marginLeft = '300px';
+                    toggleIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />`; // Chevron Left
+                }
+            }
+        }
+
+
+        function scrollToBottom() {
+            scrollAnchor.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            // Get current chat ID from the URL path
+            const pathParts = window.location.pathname.split('/');
+            const chatIdIndex = pathParts.indexOf('chat') + 1;
+            const currentChatId = (chatIdIndex > 0 && pathParts[chatIdIndex]) ? pathParts[chatIdIndex] : '{{ current_chat_id }}';
+            
+            // 1. Add user message to the DOM immediately
+            appendMessage(message, 'user');
+            userInput.value = '';
+            
+            // 2. Show loading indicator and disable input
+            loadingIndicator.classList.remove('hidden');
+            userInput.disabled = true;
+            sendButton.disabled = true;
+            scrollToBottom();
+            
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message, chat_id: currentChatId })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // 3. Add AI message to the DOM
+                    appendMessage(data.response, 'model');
+
+                    // If a new chat was created, update the URL
+                    if (data.chat_id !== currentChatId) {
+                         // Redirect to the new chat URL to update the sidebar history
+                        window.location.href = '/chat/' + data.chat_id;
+                        return; // Exit function to avoid further execution
+                    }
+
+                } else {
+                    // 4. Handle API error
+                    appendMessage(`Error: ${data.error || 'Could not get response from AI.'}`, 'error');
+                }
+
+            } catch (error) {
+                console.error('Fetch error:', error);
+                appendMessage('An unexpected network error occurred.', 'error');
+            } finally {
+                // 5. Hide loading indicator and re-enable input
+                loadingIndicator.classList.add('hidden');
+                userInput.disabled = false;
+                sendButton.disabled = false;
+                userInput.focus();
+                scrollToBottom();
+            }
+        }
+
+        function appendMessage(text, role) {
+            const messageContainer = document.createElement('div');
+            const bubble = document.createElement('div');
+            
+            if (role === 'user') {
+                messageContainer.className = 'flex justify-end';
+                bubble.className = 'message-bubble-user p-3 whitespace-pre-wrap';
+            } else if (role === 'model') {
+                messageContainer.className = 'flex justify-start';
+                bubble.className = 'message-bubble-ai p-3 whitespace-pre-wrap';
+            } else if (role === 'error') {
+                // Special styling for errors
+                messageContainer.className = 'flex justify-start';
+                bubble.className = 'p-3 whitespace-pre-wrap bg-red-800 text-white rounded-lg border border-red-700';
+            }
+
+            // Simple Markdown-like formatting (bold for **text**)
+            const formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            bubble.innerHTML = formattedText;
+            messageContainer.appendChild(bubble);
+            chatWindow.insertBefore(messageContainer, scrollAnchor);
+        }
+
+        
     </script>
+
 </body>
 </html>
