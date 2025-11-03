@@ -290,6 +290,10 @@
             window.addEventListener('resize', handleResize);
             scrollToBottom();
             setupChatHistoryContextMenu();
+            
+            // CRITICAL FIX: Ensure the input is enabled when the page loads
+            // This handles cases where the page loads into a broken state
+            resetInputAndScroll(); 
         });
         
         // Close context menu on any click outside
@@ -406,7 +410,10 @@
             iconElement.className = 'w-6 h-6';
             
             if (toggleIcon) {
-                toggleIcon.replaceWith(iconElement); // Replace old icon
+                // Check if toggleIcon is defined before attempting to replace
+                if (toggleIcon.parentNode) {
+                    toggleIcon.parentNode.replaceChild(iconElement, toggleIcon);
+                }
                 lucide.createIcons({
                     nodes: [iconElement] // Tell Lucide to render the new icon
                 });
@@ -430,6 +437,14 @@
 
         function scrollToBottom() {
             scrollAnchor.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // CRITICAL NEW FUNCTION: Resets the input fields
+        function resetInputAndScroll() {
+            userInput.disabled = false;
+            sendButton.disabled = false;
+            userInput.focus();
+            scrollToBottom();
         }
 
         // --- Core Chat Logic ---
@@ -480,17 +495,28 @@
                 loadingIndicator.classList.add('hidden');
                 appendMessage('An unexpected network error occurred.', 'error');
             } finally {
-                loadingIndicator.classList.add('hidden');
-                userInput.disabled = false;
-                sendButton.disabled = false;
-                userInput.focus();
-                scrollToBottom();
+                // CRITICAL FIX: Ensure the input is reset and re-enabled here
+                resetInputAndScroll(); 
             }
         }
 
         function appendMessage(text, role) {
             const messageContainer = document.createElement('div');
-CSS
+            const bubble = document.createElement('div');
+            
+            if (role === 'user') {
+                messageContainer.className = 'flex justify-end';
+                bubble.className = 'message-bubble-user p-4 text-sm';
+            } else { // model or error
+                messageContainer.className = 'flex justify-start';
+                // For model/error, use the AI bubble style but ensure error text stands out
+                bubble.className = 'message-bubble-ai p-4 text-sm';
+                if (role === 'error') {
+                     bubble.style.backgroundColor = '#6e2b2b'; // Dark red for errors
+                     bubble.style.color = '#ffcccc'; 
+                }
+            }
+
             // Simple markdown parsing for bold text
             const formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             
