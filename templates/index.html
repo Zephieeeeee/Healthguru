@@ -7,14 +7,16 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
-        /* Custom Styles for Gemini Look */
+        /* --- PROFESSIONAL DARK MODE STYLES --- */
+        
+        /* Body: Soft Black Background */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0d0d0f; /* Near black background */
-            color: #e0e0e6; /* Light gray text */
+            background-color: #121212; /* Cod Gray: Professional Dark Mode Background */
+            color: #e0e0e6; /* Off-white for comfortable reading */
             height: 100vh;
             margin: 0;
-            overflow: hidden; /* Prevent body scroll */
+            overflow: hidden; 
         }
         
         /* Main Layout */
@@ -23,21 +25,184 @@
             height: 100%;
         }
 
-        /* Sidebar Styling (Fixed Width, Dark Background) */
+        /* Sidebar Styling */
         #sidebar {
             width: 280px;
             min-width: 280px;
-            background-color: #121212; /* Very dark gray */
+            background-color: #1a1a1a; /* Slightly lighter than main body for depth */
             color: #e0e0e6;
             display: flex;
             flex-direction: column;
-            border-right: 1px solid #333;
+            border-right: 1px solid #333333;
             transition: all 0.3s ease;
             position: relative;
             z-index: 10;
         }
 
-        /* Responsive Sidebar Toggle */
+        /* Main Chat Area */
+        #main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #121212; 
+        }
+
+        /* Chat Header */
+        #chat-header {
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #333333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Chat Box (Scrollable Message Area) */
+        #chat-box {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            padding-bottom: 90px;
+        }
+
+        /* Message Styling */
+        .message-container {
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .message-container.user {
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 80%;
+            padding: 14px 18px; /* Slightly larger padding for modern look */
+            border-radius: 20px;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        /* Model Bubble: Base/Input Color */
+        .message-container.model .message-bubble {
+            background-color: #1f1f1f; /* Darker grey, almost black */
+            color: #e0e0e6;
+            border-top-left-radius: 8px; /* Softened corner */
+            border-bottom-left-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        /* User Bubble: Professional Teal Accent */
+        .message-container.user .message-bubble {
+            background-color: #008080; /* Deep Teal - Professional and Calming */
+            color: white;
+            border-bottom-right-radius: 8px; /* Softened corner */
+            border-top-right-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Input Area */
+        #input-area {
+            padding: 1rem 2rem;
+            background-color: #121212;
+            position: fixed;
+            bottom: 0;
+            width: calc(100% - 280px); 
+            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.4); /* Stronger shadow to separate from chat */
+            display: flex;
+            align-items: center;
+        }
+        
+        .input-wrapper {
+            background-color: #1a1a1a; /* Matches sidebar for visual continuity */
+            border-radius: 28px; /* More rounded */
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 10px 18px;
+            border: 1px solid #333333; /* Subtle border */
+        }
+
+        #message-input {
+            flex-grow: 1;
+            background: none;
+            border: none;
+            outline: none;
+            color: #e0e0e6;
+            padding: 0 10px;
+            resize: none;
+            min-height: 24px; /* Consistent height */
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 1rem;
+        }
+
+        /* Send Button Icon color is Teal */
+        #send-button {
+            background: none;
+            border: none;
+            color: #008080; /* Deep Teal accent */
+            cursor: pointer;
+            padding: 5px;
+            margin-left: 10px;
+            transition: color 0.2s;
+        }
+        
+        #send-button:hover {
+            color: #00cccc; /* Lighter teal on hover */
+        }
+
+        /* Sidebar Elements */
+        .sidebar-item {
+            padding: 10px 20px;
+            margin: 5px 10px;
+            border-radius: 12px; /* Softened corners */
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #cccccc; /* Slightly desaturated text */
+        }
+
+        .sidebar-item:hover {
+            background-color: #2c2c2c;
+            color: #e0e0e6;
+        }
+        
+        /* New Chat button text/icon color is Teal */
+        .sidebar-new-chat {
+            background-color: #008080; /* Primary Teal background */
+            color: white; 
+            margin: 15px 10px;
+            padding: 12px 20px;
+            font-weight: 600;
+            border-radius: 12px;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar-new-chat:hover {
+            background-color: #009999;
+        }
+        
+        /* HealthGuru Title */
+        .app-title {
+             color: #00cccc; /* Lighter, more vibrant teal for the title */
+             font-weight: 700;
+             letter-spacing: -0.5px;
+        }
+        
+        /* Utility Icons */
+        .icon {
+            width: 20px;
+            height: 20px;
+            stroke-width: 2;
+            fill: none;
+            stroke: currentColor;
+        }
+
+        /* Responsive overrides (Keep this) */
         @media (max-width: 768px) {
             #sidebar {
                 position: absolute;
@@ -50,166 +215,8 @@
             #main-content {
                 width: 100%;
             }
-        }
-        
-        /* Main Chat Area */
-        #main-content {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            background-color: #1c1c1e; /* Slightly lighter than sidebar */
-        }
-
-        /* Chat Header */
-        #chat-header {
-            padding: 1rem 2rem;
-            border-bottom: 1px solid #333;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        /* Chat Box (Scrollable Message Area) */
-        #chat-box {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 2rem;
-            padding-bottom: 90px; /* Space for the input area */
-        }
-
-        /* Message Styling */
-        .message-container {
-            margin-bottom: 1.5rem;
-            display: flex;
-            /* Model messages left-aligned, User messages right-aligned */
-            justify-content: flex-start;
-        }
-
-        .message-container.user {
-            justify-content: flex-end;
-        }
-
-        .message-bubble {
-            max-width: 80%;
-            padding: 12px 16px;
-            border-radius: 20px;
-            line-height: 1.6;
-        }
-
-        .message-container.model .message-bubble {
-            background-color: #2c2c2e; /* Darker grey for model */
-            color: #e0e0e6;
-            border-top-left-radius: 4px; /* Distinct corner for model */
-        }
-
-        /* --- COLOR CHANGE: User Message Bubble is Green --- */
-        .message-container.user .message-bubble {
-            background-color: #4CAF50; /* Vibrant Green */
-            color: white;
-            border-bottom-right-radius: 4px; /* Distinct corner for user */
-        }
-
-        /* Input Area */
-        #input-area {
-            padding: 1rem 2rem;
-            background-color: #1c1c1e;
-            position: fixed;
-            bottom: 0;
-            width: calc(100% - 280px); /* Adjust for sidebar width */
-            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-        }
-        
-        @media (max-width: 768px) {
             #input-area {
-                width: 100%; /* Full width on mobile */
-            }
-        }
-        
-        .input-wrapper {
-            background-color: #2c2c2e;
-            border-radius: 25px;
-            display: flex;
-            align-items: center;
-            width: 100%;
-            padding: 8px 16px;
-        }
-
-        #message-input {
-            flex-grow: 1;
-            background: none;
-            border: none;
-            outline: none;
-            color: #e0e0e6;
-            padding: 0 10px;
-            resize: none;
-            min-height: 20px;
-            max-height: 150px;
-            overflow-y: auto;
-        }
-
-        /* --- COLOR CHANGE: Send Button Icon color is Green --- */
-        #send-button {
-            background: none;
-            border: none;
-            color: #4CAF50; /* Vibrant Green accent */
-            cursor: pointer;
-            padding: 5px;
-            margin-left: 10px;
-        }
-
-        /* Sidebar Elements */
-        .sidebar-item {
-            padding: 10px 20px;
-            margin: 5px 10px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .sidebar-item:hover {
-            background-color: #2c2c2e;
-        }
-        
-        /* --- COLOR CHANGE: New Chat button text/icon color is Green --- */
-        .sidebar-new-chat {
-            background-color: #2c2c2e;
-            color: #4CAF50; /* Vibrant Green */
-            margin: 15px 10px;
-            padding: 12px 20px;
-            font-weight: 500;
-        }
-
-        .sidebar-new-chat:hover {
-            background-color: #3d3d40;
-        }
-
-        /* Utility Icons (lucide-react equivalents) */
-        .icon {
-            width: 18px;
-            height: 18px;
-            stroke-width: 2;
-            fill: none;
-            stroke: currentColor;
-        }
-
-        /* Menu Icon for Mobile */
-        .menu-icon {
-            cursor: pointer;
-            display: none;
-            margin-right: 15px;
-        }
-        @media (max-width: 768px) {
-            .menu-icon {
-                display: block;
-            }
-            #input-area {
-                width: 100%;
+                width: 100%; 
             }
         }
     </style>
@@ -220,7 +227,7 @@
         
         <div id="sidebar">
             <div class="p-4 flex justify-between items-center h-16">
-                <h1 class="text-xl font-semibold" style="color: #4CAF50;">HealthGuru</h1>
+                <h1 class="text-2xl app-title">HealthGuru</h1>
                 <button id="close-sidebar-btn" class="menu-icon md:hidden text-white hover:text-gray-400">
                     <svg class="icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
                 </button>
@@ -228,16 +235,16 @@
             
             <a href="{{ url_for('new_chat') }}" class="sidebar-item sidebar-new-chat flex items-center gap-3">
                 <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-                New Chat
+                Start New Chat
             </a>
 
             <div class="flex-grow overflow-y-auto p-2">
-                <h2 class="text-sm font-medium text-gray-500 uppercase px-3 py-2 mt-4 mb-1">Recent</h2>
+                <h2 class="text-sm font-medium text-gray-500 uppercase px-3 py-2 mt-4 mb-1">Recent Chats</h2>
                 
                 {% if all_history %}
                     {% for chat_id, chat in all_history %}
                         <a href="{{ url_for('index', chat_id=chat_id) }}" class="sidebar-item">
-                            <span class="truncate" title="{{ chat.title if chat.title != 'New Chat' else 'New Chat' }}">{{ chat.title if chat.title != 'New Chat' else 'New Chat' }}</span>
+                            <span class="truncate" title="{{ chat.title | default('New Chat') }}">{{ chat.title | default('New Chat') }}</span>
                         </a>
                     {% endfor %}
                 {% else %}
@@ -245,7 +252,7 @@
                 {% endif %}
             </div>
 
-            <div class="border-t border-gray-700 p-2">
+            <div class="border-t border-gray-800 p-2">
                 <a href="#" id="theme-toggle" class="sidebar-item">
                     <svg class="icon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
                     Settings & Help
@@ -258,7 +265,7 @@
                 <button id="open-sidebar-btn" class="menu-icon md:hidden text-white hover:text-gray-400">
                     <svg class="icon" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
                 </button>
-                <h2 class="text-xl font-medium">HealthGuru: Your AI Wellness Companion</h2>
+                <h2 class="text-xl font-medium app-title">HealthGuru</h2>
             </div>
 
             <div id="chat-box">
@@ -276,7 +283,7 @@
                     <input type="hidden" id="chat-id" value="{{ current_chat_id }}">
                     <textarea 
                         id="message-input" 
-                        placeholder="Ask your health question..." 
+                        placeholder="Ask your health or wellness question..." 
                         rows="1" 
                         class="block w-full text-lg focus:ring-0 resize-none" 
                         oninput="adjustHeight(this)" 
@@ -299,28 +306,27 @@
         function adjustHeight(el) {
             el.style.height = 'auto';
             el.style.height = (el.scrollHeight) + 'px';
-            // Also ensure chat box scrolls to bottom when input expands
             const chatBox = document.getElementById('chat-box');
             if (chatBox) {
                 chatBox.scrollTop = chatBox.scrollHeight;
             }
         }
         
-        // Initial height adjustment
+        // Initial setup on load
         document.addEventListener('DOMContentLoaded', function() {
             const input = document.getElementById('message-input');
             if (input) {
                 adjustHeight(input);
             }
-            // Fix input area width on initial load (must match CSS calc)
+            
+            // Function to update the width of the fixed input area
             function updateInputAreaWidth() {
                 const sidebar = document.getElementById('sidebar');
                 const inputArea = document.getElementById('input-area');
                 if (sidebar && inputArea) {
-                     // Check if sidebar is visible (desktop or open on mobile)
-                    const sidebarIsVisible = window.innerWidth > 768 || sidebar.classList.contains('open');
+                     const sidebarIsVisible = window.innerWidth > 768 || sidebar.classList.contains('open');
                     
-                    if (sidebarIsVisible) {
+                    if (sidebarIsVisible && window.innerWidth > 768) {
                         inputArea.style.width = `calc(100% - ${sidebar.offsetWidth}px)`;
                         inputArea.style.left = `${sidebar.offsetWidth}px`;
                     } else {
@@ -330,10 +336,8 @@
                 }
             }
             window.addEventListener('resize', updateInputAreaWidth);
-            // Wait for 100ms to ensure all elements are rendered before calculating width
             setTimeout(updateInputAreaWidth, 100); 
             
-            // Ensure the chat box scrolls down on load
             const chatBox = document.getElementById('chat-box');
             if (chatBox) {
                 chatBox.scrollTop = chatBox.scrollHeight;
