@@ -1,70 +1,50 @@
 import os
 import uuid
+import json 
 from flask import Flask, render_template, request, session, jsonify, redirect, url_for
 from dotenv import load_dotenv
 
-# --- Load Environment Variables ---
-# This ensures FLASK_SECRET_KEY and GEMINI_API_KEY are loaded from .env
-load_dotenv()
-
-# --- CORRECTED GEMINI SDK IMPORTS ---
-# We import the client directly, which is the most stable method
+# Ensure the correct client library import path
 from google.genai.client import Client as GeminiClient
 from google.genai.errors import APIError
 
-# --- Instantiate the Client Globally ---
-# The client automatically picks up the GEMINI_API_KEY from the environment
+# --- Initial Setup ---
+load_dotenv()
+
+app = Flask(__name__, static_folder='static')
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", 'super_secret_fallback_key') # Use fallback if not set
+
+# Initialize the Gemini Client globally
 try:
+    # Client initialized here handles the API Key from environment variables
     gemini_client = GeminiClient()
+    print("Gemini Client Initialized Successfully.")
 except Exception as e:
-    # Log an error if the API key setup fails before the app starts
-    print(f"Error initializing Gemini client: {e}")
-    print("Please ensure GEMINI_API_KEY is set correctly in your .env file or Render environment variables.")
-
-# --- Flask App Initialization ---
-app = Flask(__name__)
-# The secret key is essential for Flask sessions (chat history)
-app.secret_key = os.getenv('FLASK_SECRET_KEY', 'default-fallback-secret-key')
+    print(f"Error initializing Gemini Client: {e}")
+    gemini_client = None
 
 
-# --- Helper Function for Chat Initialization ---
-def get_or_create_chat(chat_id):
+def get_or_create_chat_id(chat_id=None):
     """
-    Initializes a new chat session using the GeminiClient or retrieves an existing one.
-    The session is stored in the Flask user session.
+    Retrieves a chat session from the session or creates a new one.
+    The session stores a simple dictionary containing 'messages'.
     """
     if 'history' not in session:
         session['history'] = {}
 
-    if chat_id is None or chat_id not in session['history']:
-        try:
-            # Create a new chat session with the correct model
-            # gemini-2.5-flash is fast and cost-effective for chat
-            chat_session = gemini_client.chats.create(model="gemini-2.5-flash")
-
-            # Generate a new ID and initial state
-            new_id = str(uuid.uuid4())
-            new_title = "New Chat"
-
-            session['history'][new_id] = {
-                'chat_session': chat_session,
-                'title': new_title,
-                'messages': [
-                    {
-                        "role": "model",
-                        "parts": [{"text": "Hello! I'm Healthguru, an AI trained to offer general health and wellness information. How can I assist you today?"}]
-                    }
-                ]
-            }
-            session.modified = True
-            return new_id, session['history'][new_id]
-        except Exception as e:
-            print(f"Error creating new chat session: {e}")
-            # Fallback for errors (e.g., if API key is invalid)
-            return "error", {'chat_session': None, 'title': 'Error', 'messages': [{'role': 'model', 'parts': [{'text': f'AI Initialization Error: {e}'}]}]}
-
-
-    return chat_id, session['history'][chat_id]
+    if chat_id in session['history']:
+        # Return existing chat data (simple dictionary)
+        return chat_id, session['history'][chat_id]
+    
+    # Create new chat
+    new_chat_id = str(uuid.uuid4())
+    session['history'][new_chat_id] = {
+        'messages': [],
+        'model_name': 'gemini-2.5-flash' # Default model
+    }
+    session.modified = True
+    # Return the new chat data (simple dictionary)
+    return new_chat_id, session['history'][new_chat_id]
 
 
 # --- Routes and Logic ---
@@ -72,79 +52,107 @@ def get_or_create_chat(chat_id):
 @app.route('/', defaults={'chat_id': None})
 @app.route('/chat/<chat_id>')
 def index(chat_id):
-    """Renders the main chat interface and loads or starts a chat session."""
-    current_chat_id, current_chat = get_or_create_chat(chat_id)
-    
-    # Handle the error case
-    if current_chat_id == "error":
-        messages = current_chat['messages']
-    else:
-        messages = current_chat['messages']
+    """
+    Renders the main chat interface and loads or starts a chat session.
+    """
+    # This function is fine now, as it returns a serializable dictionary
+    current_chat_id, current_chat = get_or_create_chat_id(chat_id)
+    messages = current_chat['messages']
 
-    # Send all history items for the sidebar, sorted by last message time (or title if no messages)
-    # Note: Using a simple title sort since message timestamps are complex to manage in Flask session
-    all_history = sorted(
-        session.get('history', {}).items(),
-        key=lambda item: item[1]['title'],
-        reverse=False
-    )
+    # Simple list of recent titles for sidebar.
+    recent_chats = []
+    # **BUG FIX**: We must only iterate over the keys and then look up the data.
+    # We must ensure all history items are simple dictionaries, not complex objects.
     
+    # Get all history items from the session
+    all_history_items = session.get('history', {})
+    
+    for cid, chat_data in all_history_items.items():
+        if chat_data['messages']:
+            # Use the first user message text as the title
+            try:
+                # Find the first user message for a clean title
+                first_message = next(
+                    (msg['parts'][0]['text'] for msg in chat_data['messages'] if msg['role'] == 'user'),
+                    "New Chat"
+                )
+            except:
+                first_message = "New Chat (Error reading content)"
+                
+            title = first_message
+            # Limit title length for sidebar
+            recent_chats.append({'id': cid, 'title': title[:30] + '...' if len(title) > 30 else title})
+        else:
+            # Handle empty chat history
+            recent_chats.append({'id': cid, 'title': "New Chat"})
+
+    # Sort the recent chats by creation/last access time if possible, or just alphabetically for now
+    recent_chats.sort(key=lambda x: x['title'])
+
+
     return render_template(
         'index.html',
         messages=messages,
         current_chat_id=current_chat_id,
-        all_history=all_history
+        recent_chats=recent_chats 
     )
 
 @app.route('/new_chat')
 def new_chat():
-    """Starts a brand new, empty chat session."""
-    # Simply redirecting to the index route with no chat_id will create a new one
+    """
+    Starts a brand new, empty chat session.
+    """
     return redirect(url_for('index'))
 
-@app.route('/chat', methods=["POST"])
+@app.route('/chat', methods=['POST'])
 def chat():
-    """Handles the chat message, sends to Gemini, and returns response."""
+    """
+    Handles the chat message, sends to Gemini, and returns response.
+    """
+    if gemini_client is None:
+        return jsonify({"error": "Gemini Client failed to initialize. Check API Key/Dependencies."}), 500
+
     try:
         data = request.json
-        user_message = data["message"]
-        chat_id = data["chat_id"]
-        
-        current_chat_id, current_chat = get_or_create_chat(chat_id)
+        user_message = data['message']
+        chat_id = data['chat_id']
 
-        # Check if chat session initialization failed
-        if current_chat['chat_session'] is None:
-            return jsonify({'error': 'AI client not ready. Check API key.'}), 500
-
-        # Append user message to history
-        current_chat['messages'].append({"role": "user", "parts": [{"text": user_message}]})
-
-        # --- FIX 2: Correct call to send_message ---
-        # The send_message function in the new SDK accepts only the content (user_message)
-        response = current_chat['chat_session'].send_message(user_message)
+        current_chat_id, current_chat = get_or_create_chat_id(chat_id)
         
-        # Check if this is the first message (title creation logic)
-        if len(current_chat['messages']) == 2: # 1st message is the welcome, 2nd is user's first query
-            # Prompt the model to generate a title asynchronously (optional, but good practice)
-            # For simplicity, we'll just set it to the first few words of the message for now
-            current_chat['title'] = user_message[:30] + '...' if len(user_message) > 30 else user_message
+        # 1. Add user message to history
+        current_chat['messages'].append({
+            "role": "user",
+            "parts": [{"text": user_message}]
+        })
         
-        # Append model response to history
-        # We use .to_dict() to save the response object in a JSON-serializable format in the session
-        current_chat['messages'].append(response.to_dict())
+        # 2. Call Gemini
+        # We pass the full message history (a list of dictionaries) to maintain context
+        response = gemini_client.models.generate_content(
+            model=current_chat['model_name'],
+            contents=current_chat['messages']
+        )
+        
+        ai_response_text = response.text
+        
+        # 3. Add AI message to history
+        current_chat['messages'].append({
+            "role": "model",
+            "parts": [{"text": ai_response_text}]
+        })
+        
+        # 4. Save the modified session (which only contains serializable dictionaries)
         session.modified = True
-
-        return jsonify({'response': response.text, 'chat_id': current_chat_id})
+        
+        # 5. Return the new AI response
+        return jsonify({"response": ai_response_text, "chat_id": current_chat_id})
 
     except APIError as e:
-        # Handle specific API errors (e.g., quota exceeded)
-        print(f"AI Error: {e}")
-        return jsonify({'error': f'AI Service Error: {e.message}'}), 500
+        print(f"Gemini API Error: {e}")
+        return jsonify({"error": f"An API error occurred: {e}"}), 500
     except Exception as e:
-        # Handle all other exceptions (e.g., JSON parse error, network issue)
-        print(f"Chat function error: {e}")
-        return jsonify({'error': 'An unexpected error occurred.'}), 500
+        print(f"An unexpected error occurred: {e}")
+        return jsonify({"error": f"An unexpected error occurred: {e}"}), 500
+
 
 if __name__ == '__main__':
-    # Flask runs in debug mode locally
     app.run(debug=True)
