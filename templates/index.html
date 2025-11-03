@@ -173,9 +173,10 @@
         <!-- Logo/Title - RESTORED HEALTHGURU TEXT -->
         <h1 class="text-3xl font-extrabold accent-text mb-6 tracking-tight ml-2">Healthguru</h1>
         
-        <!-- New Chat Button -->
+        <!-- New Chat Button - UPDATED TEXT -->
         <a href="/new_chat" class="w-full text-center accent-bg text-white font-semibold py-3 px-4 rounded-xl shadow-lg mb-6 transition duration-150 ease-in-out transform hover:shadow-xl flex items-center justify-center space-x-2">
             <i data-lucide="plus" class="w-5 h-5"></i>
+            <!-- TEXT CHANGED TO "New Chat" -->
             <span>New Chat</span>
         </a>
         
@@ -189,6 +190,7 @@
                         data-chat-id="{{ chat.id }}"
                         class="chat-history-item block w-full text-left {% if chat.id == current_chat_id %}bg-indigo-900/40 border border-indigo-700/50{% else %}hover:bg-gray-800/50{% endif %} py-2 px-3 rounded-lg mb-1 text-sm transition duration-100 ease-in-out truncate font-medium text-white/90"
                     >
+                        <!-- Title is rendered here. It will now be dynamic -->
                         {{ chat.title }}
                     </a>
                 {% endfor %}
