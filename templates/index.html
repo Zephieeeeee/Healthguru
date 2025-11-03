@@ -15,14 +15,15 @@
     <style>
         /* Define color variables for easy theming */
         :root {
-            --color-primary: #2563eb; /* Indigo-600 */
-            --color-secondary: #2dd4bf; /* Teal-400 */
+            --color-primary: #1a73e8; /* Blue for primary action */
+            --color-secondary: #00bcd4; /* Cyan/Teal for accents */
             --color-bg-dark: #0d1117; 
-            --color-bg-sidebar: #161b22;
-            --color-bg-ai: #161b22;
-            --color-bg-user: #1f2937;
+            --color-bg-sidebar: #1f2328; /* Slightly lighter sidebar for better contrast */
+            --color-bg-ai: #1f2328;
+            --color-bg-user: #354152;
             --color-text-light: #e5e7eb;
-            --color-border: #30363d;
+            --color-border: #3c4146;
+            --color-input-border-focus: #1a73e8; /* Blue focus color */
         }
 
         body {
@@ -34,7 +35,7 @@
 
         /* Utility classes based on variables */
         .accent-bg { background-color: var(--color-primary); }
-        .accent-bg:hover { background-color: #1d4ed8; } /* Indigo-700 equivalent */
+        .accent-bg:hover { background-color: #1562c5; } 
         .accent-text { color: var(--color-secondary); }
 
         /* Message Bubbles - Refined Contrast and Shapes */
@@ -86,6 +87,45 @@
             #history-sidebar.active { transform: translateX(0); }
             #main-content { margin-left: 0; }
         }
+
+        /* New Modern Input Styling */
+        #input-container {
+            background-color: var(--color-bg-ai); 
+            border: 1px solid var(--color-border);
+            border-radius: 1.5rem; /* Rounded pill shape */
+            transition: box-shadow 0.3s ease-in-out;
+        }
+
+        #input-container:focus-within {
+            /* Mimic the subtle focus ring of Gemini */
+            border-color: var(--color-input-border-focus);
+            box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.3), 0 1px 3px rgba(0,0,0,0.3);
+        }
+        
+        #user-input {
+            background-color: transparent;
+            border: none;
+            padding: 0.75rem 1.5rem; /* Tweak padding for better feel */
+            outline: none;
+            color: var(--color-text-light);
+        }
+
+        #send-button {
+            background-color: var(--color-primary); 
+            border-radius: 50%; /* Make button circular */
+            width: 3rem; 
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.5rem;
+        }
+
+        #send-button:disabled {
+            background-color: #3b82f6; /* Lighter blue for disabled state */
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body id="body-container">
@@ -96,7 +136,7 @@
         <h1 class="text-3xl font-bold accent-text mb-8 tracking-wide">Healthguru</h1>
         
         <!-- New Chat Button -->
-        <a href="/new_chat" class="w-full text-center accent-bg text-white font-semibold py-3 px-4 rounded-xl shadow-lg mb-6 transition duration-150 ease-in-out transform hover:scale-[1.01]">
+        <a href="/new_chat" class="w-full text-center bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-xl shadow-lg mb-6 transition duration-150 ease-in-out transform hover:scale-[1.01]">
             Start New Consultation
         </a>
         
@@ -151,7 +191,7 @@
             
             <!-- Greeting Message -->
             <div class="flex justify-start">
-                <div class="message-bubble-ai p-4 text-sm">
+                <div class="message-bubble-ai p-4 text-base">
                     Hello! I'm Healthguru, an AI trained to offer general health and wellness information. Please remember I am **not a medical professional**. Consult a doctor for personalized advice. How can I assist you today?
                 </div>
             </div>
@@ -160,27 +200,27 @@
             {% for message in messages %}
                 {% if message.role == 'user' %}
                     <div class="flex justify-end">
-                        <div class="message-bubble-user p-4 text-sm">
+                        <div class="message-bubble-user p-4 text-base">
                             {{ message.parts[0].text }}
                         </div>
                     </div>
                 {% elif message.role == 'model' %}
                     <div class="flex justify-start">
-                        <div class="message-bubble-ai p-4 whitespace-pre-wrap text-sm">
+                        <div class="message-bubble-ai p-4 whitespace-pre-wrap text-base">
                             {{ message.parts[0].text }}
                         </div>
                     </div>
                 {% endif %}
             {% endfor %}
 
-            <!-- Loading Indicator (MOVED TO BE RIGHT BEFORE SCROLL ANCHOR) -->
+            <!-- Loading Indicator -->
             <div id="loading-indicator" class="flex justify-start hidden">
                 <div class="message-bubble-ai p-4">
                     <div class="flex items-center space-x-2">
                         <div class="w-3 h-3 bg-teal-400 rounded-full animate-pulse"></div>
                         <div class="w-3 h-3 bg-teal-400 rounded-full animate-pulse delay-75"></div>
                         <div class="w-3 h-3 bg-teal-400 rounded-full animate-pulse delay-150"></div>
-                        <span class="text-sm font-medium text-gray-300">Healthguru is formulating its response...</span>
+                        <span class="text-base font-medium text-gray-300">Healthguru is formulating its response...</span>
                     </div>
                 </div>
             </div>
@@ -189,23 +229,30 @@
             <div id="scroll-anchor"></div>
         </div>
 
-        <!-- INPUT FOOTER -->
+        <!-- INPUT FOOTER - MODERN SINGLE BOX -->
         <div class="sticky bottom-0 bg-gray-900/90 backdrop-blur-sm p-4 border-t border-gray-800 shadow-2xl">
-            <div class="max-w-4xl mx-auto flex space-x-4">
-                <input 
-                    type="text" 
-                    id="user-input" 
-                    placeholder="Ask your health question..." 
-                    class="flex-grow p-4 rounded-xl bg-gray-800 text-white border border-gray-700 focus:ring-teal-400 focus:border-teal-400 transition duration-200 ease-in-out shadow-inner"
-                    onkeypress="if(event.key === 'Enter') { sendMessage(); }"
-                >
-                <button 
-                    onclick="sendMessage()" 
-                    id="send-button"
-                    class="accent-bg hover:bg-indigo-700 text-white font-semibold py-4 px-8 rounded-xl shadow-lg transition duration-200 ease-in-out transform hover:scale-[1.02]"
-                >
-                    Send
-                </button>
+            <div class="max-w-4xl mx-auto flex items-center justify-center">
+                
+                <div id="input-container" class="flex items-center w-full max-w-4xl">
+                    <input 
+                        type="text" 
+                        id="user-input" 
+                        placeholder="Ask your health question..." 
+                        class="flex-grow text-base"
+                        onkeypress="if(event.key === 'Enter') { sendMessage(); }"
+                    >
+                    <button 
+                        onclick="sendMessage()" 
+                        id="send-button"
+                        class="text-white transition duration-200 ease-in-out transform hover:scale-[1.05]"
+                    >
+                        <!-- Send Arrow Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </button>
+                </div>
+
             </div>
         </div>
 
@@ -312,22 +359,43 @@
             appendMessage(message, 'user');
             userInput.value = '';
             
-            // 2. UI State change to loading (Loading indicator is now correctly positioned after the new user message)
+            // 2. UI State change to loading
             loadingIndicator.classList.remove('hidden');
             userInput.disabled = true;
             sendButton.disabled = true;
             scrollToBottom();
             
             try {
-                const response = await fetch('/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: message, chat_id: currentChatId })
-                });
+                // Implementing simple exponential backoff for the fetch call
+                let response;
+                let data;
+                const maxRetries = 3;
+                let delay = 1000;
 
-                const data = await response.json();
+                for (let i = 0; i < maxRetries; i++) {
+                    try {
+                        response = await fetch('/chat', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ message: message, chat_id: currentChatId })
+                        });
 
-                if (response.ok) {
+                        if (response.ok) {
+                            data = await response.json();
+                            break; // Success
+                        }
+                    } catch (error) {
+                        // Network error, log and retry
+                        if (i < maxRetries - 1) {
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            delay *= 2;
+                        } else {
+                            throw error; // Re-throw if last attempt failed
+                        }
+                    }
+                }
+
+                if (response && response.ok) {
                     // 3. Remove loading indicator and append AI response
                     loadingIndicator.classList.add('hidden');
                     appendMessage(data.response, 'model');
@@ -338,10 +406,15 @@
                         return;
                     }
 
-                } else {
-                    // Handle server errors
+                } else if (response) {
+                    // Handle server errors (e.g., 4xx, 5xx not caught by fetch.catch)
+                    data = await response.json();
                     loadingIndicator.classList.add('hidden');
                     appendMessage(`Error: ${data.error || 'Could not get response from AI.'}`, 'error');
+                } else {
+                     // Should only happen if max retries failed due to network
+                    loadingIndicator.classList.add('hidden');
+                    appendMessage('An unexpected network error occurred after multiple retries.', 'error');
                 }
 
             } catch (error) {
@@ -364,13 +437,13 @@
             
             if (role === 'user') {
                 messageContainer.className = 'flex justify-end';
-                bubble.className = 'message-bubble-user p-4 whitespace-pre-wrap text-sm';
+                bubble.className = 'message-bubble-user p-4 whitespace-pre-wrap text-base';
             } else if (role === 'model') {
                 messageContainer.className = 'flex justify-start';
-                bubble.className = 'message-bubble-ai p-4 whitespace-pre-wrap text-sm';
+                bubble.className = 'message-bubble-ai p-4 whitespace-pre-wrap text-base';
             } else if (role === 'error') {
                 // Distinct styling for error messages
-                bubble.className = 'p-4 whitespace-pre-wrap bg-red-800 text-white rounded-xl border border-red-700 text-sm';
+                bubble.className = 'p-4 whitespace-pre-wrap bg-red-800 text-white rounded-xl border border-red-700 text-base';
                 messageContainer.className = 'flex justify-start';
             }
 
@@ -378,8 +451,9 @@
             const formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             
             bubble.innerHTML = formattedText;
-            messageContainer.appendChild(bubble);
-            chatWindow.insertBefore(messageContainer, loadingIndicator); // Insert before loading indicator, which is before the anchor
+            
+            // Insert the new message right before the loading indicator
+            chatWindow.insertBefore(messageContainer, loadingIndicator); 
         }
 
     </script>
