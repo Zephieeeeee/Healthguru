@@ -1,12 +1,15 @@
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Healthguru: AI Wellness Companion</title>
+    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Inter font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS STYLES -->
     <style>
         /* Custom styles for dark theme and responsiveness */
         body {
@@ -15,29 +18,30 @@
             color: #f1f1f1; /* Light text */
             overflow-x: hidden; /* Prevent horizontal scrolling */
         }
-        /* Color matching your original polished look */
+        /* Message Bubbles - DARK BLUE THEME */
         .message-bubble-user {
-            background-color: #313131; /* Dark grey for user messages */
+            /* User: Dark, subtle blue-gray */
+            background-color: #2d3748; 
             color: #ffffff;
             border-radius: 1rem 1rem 0.25rem 1rem;
-            max-width: 90%; /* Responsive width */
-            margin-left: auto; /* Push to the right */
+            max-width: 90%;
+            margin-left: auto;
         }
         .message-bubble-ai {
-            background-color: #242424; /* Even darker grey for AI messages */
+            /* AI: Darker grey */
+            background-color: #242424; 
             color: #f1f1f1;
             border-radius: 1rem 1rem 1rem 0.25rem;
-            max-width: 90%; /* Responsive width */
-            margin-right: auto; /* Push to the left */
+            max-width: 90%;
+            margin-right: auto;
             border: 1px solid #333;
         }
-
         /* Sidebar Styling (History Panel) */
         #history-sidebar {
-            width: 300px; /* Fixed desktop width */
-            background-color: #1f1f1f; /* Sidebar background */
+            width: 300px; 
+            background-color: #1f1f1f; /* Sidebar background, matching the original */
             transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
-            position: fixed; /* Fixed position */
+            position: fixed;
             top: 0;
             left: 0;
             height: 100%;
@@ -50,10 +54,10 @@
             margin-left: 300px; /* Offset by sidebar width on desktop */
             transition: margin-left 0.3s ease-in-out;
             min-height: 100vh;
-            padding-top: 1rem; /* Space for the header */
+            padding-top: 1rem;
         }
 
-        /* Hidden State for Sidebar (Applied by JS) */
+        /* Hidden State for Sidebar (Desktop) */
         #history-sidebar.collapsed {
             transform: translateX(-300px);
         }
@@ -63,37 +67,42 @@
             margin-left: 0;
         }
 
-        /* Mobile Adjustments (Sidebar covers entire screen) */
+        /* Mobile Adjustments */
         @media (max-width: 768px) {
             #history-sidebar {
-                width: 100%; /* Full width on mobile */
-                transform: translateX(-100%); /* Hidden by default on mobile */
+                width: 100%;
+                transform: translateX(-100%);
             }
             #history-sidebar.active {
-                transform: translateX(0); /* Visible state */
+                transform: translateX(0);
             }
             #main-content {
-                margin-left: 0; /* No offset on mobile */
+                margin-left: 0;
+            }
+            /* Show the mobile hamburger button */
+            #sidebar-toggle-mobile {
+                display: block !important;
+            }
+            /* Hide the desktop chevron on mobile */
+            #sidebar-toggle-desktop {
+                display: none !important;
             }
         }
         
-        /* Ensure the toggle button is always visible on the far left of the main header */
+        /* Desktop Toggle Button Position */
         #sidebar-toggle-desktop {
             position: absolute;
             left: 10px;
             top: 50%;
             transform: translateY(-50%);
-            z-index: 30; /* Above the header */
-        }
-        
-        /* Hide mobile-specific elements on desktop */
-        #sidebar-toggle-mobile {
-            display: none;
+            z-index: 30;
+            display: block; 
         }
         
         /* Adjust header content to not overlap the button */
         .main-header-content {
-            margin-left: 40px;
+            /* Pushes title away from the chevron icon */
+            margin-left: 40px; 
         }
 
     </style>
@@ -102,9 +111,10 @@
 
     <!-- 1. HISTORY SIDEBAR -->
     <div id="history-sidebar" class="p-4 flex flex-col">
-        <h1 class="text-3xl font-bold text-green-400 mb-6">Healthguru</h1>
+        <!-- Sidebar header uses the new CYAN accent color -->
+        <h1 class="text-3xl font-bold text-cyan-500 mb-6">Healthguru</h1>
         
-        <a href="/new_chat" class="w-full text-center bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md mb-6 transition duration-150 ease-in-out">
+        <a href="/new_chat" class="w-full text-center bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md mb-6 transition duration-150 ease-in-out">
             New Chat
         </a>
         
@@ -130,26 +140,27 @@
     <!-- 2. MAIN CONTENT AREA -->
     <div id="main-content" class="min-h-screen flex flex-col">
 
-        <!-- HEADER / NAVIGATION -->
+        <!-- HEADER / NAVIGATION (uses a dark background) -->
         <header class="p-4 bg-black/50 sticky top-0 z-10 shadow-lg relative flex items-center">
             
-            <!-- Toggle Button (Visible on Desktop/Tablet and positioned on the left) -->
-            <button id="sidebar-toggle-desktop" onclick="toggleSidebar()" class="text-white hover:text-green-400 p-2 rounded-full transition duration-150 ease-in-out">
+            <!-- Toggle Button (Desktop/Tablet) - Updated hover color -->
+            <button id="sidebar-toggle-desktop" onclick="toggleSidebar()" class="text-white hover:text-cyan-400 p-2 rounded-full transition duration-150 ease-in-out">
                 <!-- Chevron Left Icon (Default state: Sidebar Visible) -->
                 <svg id="toggle-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
                 </svg>
             </button>
 
-            <!-- Toggle Button (Hidden on Desktop, Visible on Mobile) -->
-            <button id="sidebar-toggle-mobile" onclick="toggleSidebar()" class="text-white hover:text-green-400 p-2 rounded-full transition duration-150 ease-in-out">
+            <!-- Toggle Button (Mobile) - Updated hover color -->
+            <button id="sidebar-toggle-mobile" onclick="toggleSidebar()" class="text-white hover:text-cyan-400 p-2 rounded-full transition duration-150 ease-in-out" style="display: none;">
                 <!-- Hamburger Icon -->
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" />
                 </svg>
             </button>
             
-            <h1 class="text-xl font-semibold text-white main-header-content ml-12">Healthguru: Your AI Wellness Companion</h1>
+            <!-- Header Title: Uses a lighter blue for contrast -->
+            <h1 class="text-xl font-semibold text-blue-300 main-header-content">Healthguru: Your AI Wellness Companion</h1>
             
         </header>
 
@@ -180,13 +191,13 @@
                 {% endif %}
             {% endfor %}
 
-            <!-- Loading Indicator -->
+            <!-- Loading Indicator - Updated dot color -->
             <div id="loading-indicator" class="flex justify-start hidden">
                 <div class="message-bubble-ai p-3">
                     <div class="flex items-center space-x-2">
-                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse delay-75"></div>
-                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse delay-150"></div>
+                        <div class="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></div>
+                        <div class="w-2 h-2 bg-cyan-500 rounded-full animate-pulse delay-75"></div>
+                        <div class="w-2 h-2 bg-cyan-500 rounded-full animate-pulse delay-150"></div>
                         <span class="text-sm">Healthguru is thinking...</span>
                     </div>
                 </div>
@@ -203,13 +214,13 @@
                     type="text" 
                     id="user-input" 
                     placeholder="Ask your health question..." 
-                    class="flex-grow p-3 rounded-xl bg-gray-800 text-white border border-gray-700 focus:ring-green-500 focus:border-green-500 transition duration-150 ease-in-out shadow-lg"
+                    class="flex-grow p-3 rounded-xl bg-gray-800 text-white border border-gray-700 focus:ring-cyan-500 focus:border-cyan-500 transition duration-150 ease-in-out shadow-lg"
                     onkeypress="if(event.key === 'Enter') { sendMessage(); }"
                 >
                 <button 
                     onclick="sendMessage()" 
                     id="send-button"
-                    class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition duration-150 ease-in-out transform hover:scale-105"
+                    class="bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition duration-150 ease-in-out transform hover:scale-105"
                 >
                     Send
                 </button>
@@ -218,7 +229,7 @@
 
     </div>
 
-    <!-- JavaScript Logic -->
+    <!-- JAVASCRIPT LOGIC -->
     <script>
         const chatWindow = document.getElementById('chat-window');
         const userInput = document.getElementById('user-input');
@@ -233,22 +244,18 @@
         const toggleButtonMobile = document.getElementById('sidebar-toggle-mobile');
 
         let isMobile = window.innerWidth <= 768;
-        let isSidebarOpen = !isMobile; // Start open on desktop, start closed on mobile
+        let isSidebarOpen = !isMobile;
 
         // Initial setup on load
         document.addEventListener('DOMContentLoaded', () => {
             if (isMobile) {
-                // Mobile: Hide sidebar initially
+                isSidebarOpen = false;
                 historySidebar.classList.add('collapsed');
-                toggleButtonDesktop.style.display = 'none';
-                toggleButtonMobile.style.display = 'block';
             } else {
-                // Desktop: Show sidebar initially
+                isSidebarOpen = true;
                 historySidebar.classList.remove('collapsed');
-                toggleButtonDesktop.style.display = 'block';
-                toggleButtonMobile.style.display = 'none';
             }
-            // Ensure correct initial icon
+            updateToggleVisibility();
             updateToggleIcon();
             scrollToBottom();
         });
@@ -262,23 +269,29 @@
                 if (!isMobile) {
                     // Transitioning to Desktop: Force open state
                     isSidebarOpen = true;
-                    historySidebar.classList.remove('collapsed');
-                    historySidebar.classList.remove('active');
+                    historySidebar.classList.remove('collapsed', 'active');
                     bodyContainer.classList.remove('sidebar-collapsed');
-                    toggleButtonDesktop.style.display = 'block';
-                    toggleButtonMobile.style.display = 'none';
                 } else {
                     // Transitioning to Mobile: Force closed state
                     isSidebarOpen = false;
                     historySidebar.classList.add('collapsed');
                     historySidebar.classList.remove('active');
                     bodyContainer.classList.remove('sidebar-collapsed');
-                    toggleButtonDesktop.style.display = 'none';
-                    toggleButtonMobile.style.display = 'block';
                 }
+                updateToggleVisibility();
                 updateToggleIcon();
             }
         });
+
+        function updateToggleVisibility() {
+            if (isMobile) {
+                toggleButtonDesktop.style.display = 'none';
+                toggleButtonMobile.style.display = 'block';
+            } else {
+                toggleButtonDesktop.style.display = 'block';
+                toggleButtonMobile.style.display = 'none';
+            }
+        }
 
         function updateToggleIcon() {
             if (!isMobile) {
@@ -290,9 +303,8 @@
                     // Closed: Show chevron right
                     toggleIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />`; 
                 }
-            } else {
-                // Mobile icon: Hamburger menu is used, doesn't change visually on toggle
             }
+            // Mobile icon (Hamburger) remains static
         }
 
 
@@ -300,10 +312,10 @@
             isSidebarOpen = !isSidebarOpen;
             
             if (isMobile) {
-                // Mobile: Use 'active' class to slide in 100% width sidebar
+                // Mobile: Use 'active' class (full-screen overlay)
                 historySidebar.classList.toggle('active');
             } else {
-                // Desktop: Use 'collapsed' on sidebar and 'sidebar-collapsed' on body
+                // Desktop: Toggle 'collapsed' on sidebar and 'sidebar-collapsed' on body
                 historySidebar.classList.toggle('collapsed');
                 bodyContainer.classList.toggle('sidebar-collapsed');
             }
@@ -311,7 +323,7 @@
             updateToggleIcon();
         }
 
-        // --- Chat Logic (Kept the same) ---
+        // --- Chat Logic ---
 
         function scrollToBottom() {
             scrollAnchor.scrollIntoView({ behavior: 'smooth' });
@@ -323,6 +335,7 @@
 
             const pathParts = window.location.pathname.split('/');
             const chatIdIndex = pathParts.indexOf('chat') + 1;
+            // Uses the current chat ID from the URL or the one passed from the server template
             const currentChatId = (chatIdIndex > 0 && pathParts[chatIdIndex]) ? pathParts[chatIdIndex] : '{{ current_chat_id }}';
             
             appendMessage(message, 'user');
@@ -334,6 +347,7 @@
             scrollToBottom();
             
             try {
+                // This assumes your Flask server is running on the same domain/port
                 const response = await fetch('/chat', {
                     method: 'POST',
                     headers: {
@@ -348,6 +362,7 @@
                     appendMessage(data.response, 'model');
 
                     if (data.chat_id !== currentChatId) {
+                        // If a new chat ID was created by the server, redirect
                         window.location.href = '/chat/' + data.chat_id;
                         return;
                     }
@@ -383,6 +398,7 @@
                 messageContainer.className = 'flex justify-start';
             }
 
+            // Simple markdown parsing for bold text
             const formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             
             bubble.innerHTML = formattedText;
