@@ -1,4 +1,5 @@
 Flask
 python-dotenv
-google-generativeai 
+# Use the correct, modern package name for the Google GenAI SDK
+google-genai
 gunicorn
