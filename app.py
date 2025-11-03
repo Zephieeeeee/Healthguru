@@ -2,16 +2,20 @@ import os
 import uuid
 import json
 from flask import Flask, render_template, request, session, jsonify, redirect, url_for
-from datetime import datetime
+from datetime import datetime, MINYEAR
 from google import genai
 from google.genai.errors import APIError
+from dotenv import load_dotenv # <-- IMPORT IS NOW AT THE TOP
 
 # --- Configuration & Initialization ---
-load_dotenv()
 
+load_dotenv() # <-- FUNCTION IS NOW CALLED *AFTER* IMPORT
+
+# Use environment variable for API Key
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 client = genai.Client(api_key=GEMINI_API_KEY)
 
+# Flask App setup
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "a_very_secret_key_for_session")
 
@@ -48,27 +52,32 @@ def get_or_create_chat(chat_id=None):
 def get_all_chats_for_sidebar():
     """
     Returns all chats, sorted reverse chronologically, 
-    and fixes any old chats that are missing titles.
+    ensuring all chat objects are valid and have a title.
     """
     history = session.get('history', {})
     clean_chats = []
     
-    min_datetime = datetime(1970, 1, 1).isoformat() # Default for sorting
+    # Use a default minimum datetime for sorting entries that might be malformed
+    min_datetime = datetime(MINYEAR, 1, 1).isoformat()
     
     for chat_id, chat_data in history.items():
         if not isinstance(chat_data, dict):
-            continue # Skip old, malformed data
+            continue # Skip malformed, old session data
         
-        # FIX: Ensure all chats have the keys they need to render
+        # Ensure essential keys exist on all chat objects
         chat_data['id'] = chat_data.get('id', chat_id)
         chat_data['created_at'] = chat_data.get('created_at', min_datetime)
         
+        # If 'title' is missing or blank, provide a default
         if not chat_data.get('title'):
-             chat_data['title'] = 'Untitled Chat' # Fix for blank history items
+            chat_data['title'] = 'Untitled Chat'
+        # Fix for chats that were new but never got a message
+        elif chat_data['title'] == 'New Chat' and not chat_data.get('messages'):
+             chat_data['title'] = 'Untitled Chat'
         
         clean_chats.append(chat_data)
 
-    # Sort history by creation time (the 'created_at' field)
+    # Sort the clean list by creation time
     sorted_chats = sorted(
         clean_chats, 
         key=lambda x: datetime.fromisoformat(x['created_at']),
@@ -85,13 +94,12 @@ def Index(chat_id):
     
     all_history = get_all_chats_for_sidebar()
     
-    # --- BUG FIX: "New Chat on Refresh" ---
+    # FIX: "New Chat on Refresh"
     if chat_id is None:
         if all_history:
             # If user visits "/" and has history, redirect to the most recent chat
             latest_chat_id = all_history[0]['id']
             return redirect(url_for('Index', chat_id=latest_chat_id))
-        # If no history, fall through to create a new chat
             
     current_chat_id, current_chat = get_or_create_chat(chat_id)
     messages = current_chat['messages']
@@ -105,7 +113,6 @@ def Index(chat_id):
 @app.route('/new_chat')
 def new_chat():
     """Starts a brand new, empty chat session."""
-    # Explicitly create a new chat and redirect to its ID
     new_id, _ = get_or_create_chat(None)
     return redirect(url_for('Index', chat_id=new_id))
 
@@ -161,7 +168,7 @@ def chat():
         print(f"Unexpected error: {e}")
         return jsonify(error="An unexpected error occurred."), 500
 
-# --- NEW FEATURE: DELETE CHAT ROUTE ---
+# --- NEW ROUTE: DELETE CHAT ---
 @app.route('/delete_chat/<chat_id>', methods=['POST'])
 def delete_chat(chat_id):
     """Deletes a chat session from the history."""
