@@ -12,7 +12,7 @@
     <!-- Load Lucide Icons for a professional look -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Load marked library for client-side markdown parsing (CRITICAL FIX) -->
+    <!-- Load marked library for client-side markdown parsing -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <!-- ================================================================= -->
@@ -24,7 +24,7 @@
             --color-bg-base: #0f0f0f;         /* Almost black base */
             --color-bg-sidebar: #191919;      /* Darker gray for Sidebar */
             --color-bg-chat: #242424;         /* Slightly lighter for chat input/bubbles */
-            --color-accent-blue: #4f46e5;     /* Restored Indigo/Blue Accent */
+            --color-accent-blue: #4f46e5;     /* Indigo/Blue Accent */
             --color-text-primary: #e5e7eb;    /* Light Gray Text */
             --color-text-muted: #a1a1aa;      /* Zinc Gray Muted Text */
             --color-border: #3f3f46;          /* Zinc border color */
@@ -37,7 +37,7 @@
             overflow-x: hidden;
         }
 
-        /* Utility classes using the variables - RESTORED ACCENT */
+        /* Utility classes using the variables */
         .accent-bg { background-color: var(--color-accent-blue); }
         .accent-bg:hover { background-color: #4338ca; } 
         .accent-text { color: var(--color-accent-blue); }
@@ -115,11 +115,10 @@
             margin-left: 300px; 
             transition: margin-left 0.3s ease-in-out;
             min-height: 100vh;
-            background-color: var(--color-bg-base); /* Ensure the main area is the base color */
+            background-color: var(--color-bg-base); 
         }
         
         #chat-window {
-            /* Use padding-bottom equivalent to the input area height for better scrolling */
             padding-bottom: 120px; 
         }
 
@@ -163,7 +162,6 @@
             #history-sidebar { width: 100%; transform: translateX(-100%); }
             #history-sidebar.active { transform: translateX(0); }
             #main-content { margin-left: 0; }
-            /* The mobile toggle button is now visible */
             #sidebar-toggle-mobile { display: block !important; }
         }
     </style>
@@ -172,7 +170,7 @@
 
     <!-- 1. HISTORY SIDEBAR -->
     <div id="history-sidebar" class="p-4 flex flex-col">
-        <!-- Logo/Title -->
+        <!-- Logo/Title - RESTORED HEALTHGURU TEXT -->
         <h1 class="text-3xl font-extrabold accent-text mb-6 tracking-tight ml-2">Healthguru</h1>
         
         <!-- New Chat Button -->
@@ -189,7 +187,7 @@
                     <a 
                         href="/chat/{{ chat.id }}" 
                         data-chat-id="{{ chat.id }}"
-                        class="chat-history-item block w-full text-left {% if chat.id == current_chat_id %}bg-gray-700/50{% else %}hover:bg-gray-800/50{% endif %} py-2 px-3 rounded-lg mb-1 text-sm transition duration-100 ease-in-out truncate font-medium text-white/90"
+                        class="chat-history-item block w-full text-left {% if chat.id == current_chat_id %}bg-indigo-900/40 border border-indigo-700/50{% else %}hover:bg-gray-800/50{% endif %} py-2 px-3 rounded-lg mb-1 text-sm transition duration-100 ease-in-out truncate font-medium text-white/90"
                     >
                         {{ chat.title }}
                     </a>
@@ -229,7 +227,6 @@
         </header>
 
         <!-- CHAT DISPLAY AREA -->
-        <!-- Center the chat content and give it max width -->
         <div class="flex-grow overflow-y-auto w-full flex justify-center">
             <div id="chat-window" class="p-6 space-y-8 max-w-4xl w-full">
                 
@@ -261,7 +258,7 @@
                     {% endif %}
                 {% endfor %}
 
-                <!-- Loading Indicator (CRITICAL: Placed correctly at the bottom, before the anchor) -->
+                <!-- Loading Indicator -->
                 <div id="loading-indicator" class="flex justify-start hidden">
                     <div class="message-bubble-ai p-4">
                         <div class="flex items-center space-x-2">
@@ -273,7 +270,7 @@
                     </div>
                 </div>
                 
-                <!-- Scroll Anchor (Ensures bottom visibility) -->
+                <!-- Scroll Anchor -->
                 <div id="scroll-anchor" class="h-1"></div>
             </div>
         </div>
@@ -327,7 +324,7 @@
 
 
     <!-- ================================================================= -->
-    <!-- JAVASCRIPT LOGIC (Color agnostic, functionality only) -->
+    <!-- JAVASCRIPT LOGIC -->
     <!-- ================================================================= -->
     <script>
         // Initialize Lucide Icons
@@ -365,7 +362,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             initializeLayout();
             window.addEventListener('resize', handleResize);
-            // CRITICAL FIX: Parse all existing AI messages on page load
+            // Parse all existing AI messages on page load
             document.querySelectorAll('.markdown-content').forEach(el => {
                 const rawContent = el.getAttribute('data-raw-content');
                 if (rawContent) {
@@ -376,7 +373,6 @@
             scrollToBottom();
             setupChatHistoryContextMenu();
             
-            // CRITICAL FIX: Ensure the input is enabled when the page loads
             resetInputAndScroll(); 
         });
         
@@ -417,7 +413,6 @@
         function showDeleteConfirmation() {
             contextMenu.style.display = 'none';
             deleteModal.classList.remove('hidden');
-            // Re-render Lucide icons in the modal if necessary (for modern UI)
             lucide.createIcons();
         }
 
@@ -506,10 +501,8 @@
             const currentToggleIcon = document.getElementById('toggle-icon');
             if (currentToggleIcon && currentToggleIcon.parentNode) {
                 currentToggleIcon.parentNode.replaceChild(iconElement, currentToggleIcon);
-                // Update the id for the next cycle
                 iconElement.id = 'toggle-icon'; 
             } else if (toggleButtonDesktop) {
-                // Initial placement if not already there
                 const existingIcon = toggleButtonDesktop.querySelector('i');
                 if (existingIcon) {
                     toggleButtonDesktop.replaceChild(iconElement, existingIcon);
@@ -517,7 +510,7 @@
                 }
             }
 
-            // Re-create all Lucide icons (important when injecting them)
+            // Re-create all Lucide icons
             lucide.createIcons();
         }
 
@@ -543,9 +536,8 @@
         function resetInputAndScroll() {
             userInput.disabled = false;
             sendButton.disabled = false;
-            // Use opacity for the disabled state on the button
             sendButton.classList.remove('opacity-50', 'cursor-not-allowed'); 
-            loadingIndicator.classList.add('hidden'); // Ensure loading indicator is hidden
+            loadingIndicator.classList.add('hidden'); 
             userInput.focus();
             scrollToBottom();
         }
@@ -554,7 +546,7 @@
             userInput.disabled = true;
             sendButton.disabled = true;
             sendButton.classList.add('opacity-50', 'cursor-not-allowed');
-            // CRITICAL FIX: Ensure loading indicator is placed at the very end
+            // Ensure loading indicator is placed at the very end
             chatWindow.insertBefore(loadingIndicator, scrollAnchor); 
             loadingIndicator.classList.remove('hidden');
             scrollToBottom();
@@ -575,7 +567,7 @@
             appendMessage(message, 'user');
             userInput.value = '';
             
-            // 2. Disable input and show loader (now correctly placed at the bottom)
+            // 2. Disable input and show loader
             disableInputAndScroll();
             
             try {
@@ -622,19 +614,18 @@
             if (role === 'user') {
                 messageContainer.className = 'flex justify-end';
                 bubble.className = 'message-bubble-user p-4 text-base shadow-md';
-                bubble.innerText = text; // User messages are raw text
+                bubble.innerText = text; 
             } else { // model or error
                 messageContainer.className = 'flex justify-start';
                 bubble.className = 'message-bubble-ai p-4 text-base shadow-md';
                 
                 if (role === 'error') {
-                     // Error style: red background, white text
                      bubble.style.backgroundColor = '#991b1b'; 
                      bubble.style.color = '#fee2e2'; 
                      bubble.style.borderRadius = '0.5rem';
                      bubble.innerText = text;
                 } else {
-                    // CRITICAL FIX: Parse the model's markdown response to HTML
+                    // Parse the model's markdown response to HTML
                     bubble.innerHTML = marked.parse(text); 
                     bubble.classList.add('markdown-content');
                 }
@@ -644,7 +635,7 @@
             // Insert before scroll anchor
             chatWindow.insertBefore(messageContainer, scrollAnchor); 
             
-            // Re-check for new icons (for model response)
+            // Re-check for new icons 
             lucide.createIcons(); 
         }
 
