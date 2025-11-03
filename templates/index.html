@@ -173,7 +173,7 @@
                 {% endif %}
             {% endfor %}
 
-            <!-- Loading Indicator -->
+            <!-- Loading Indicator (MOVED TO BE RIGHT BEFORE SCROLL ANCHOR) -->
             <div id="loading-indicator" class="flex justify-start hidden">
                 <div class="message-bubble-ai p-4">
                     <div class="flex items-center space-x-2">
@@ -184,7 +184,7 @@
                     </div>
                 </div>
             </div>
-
+            
             <!-- Scroll Anchor (Ensures bottom visibility) -->
             <div id="scroll-anchor"></div>
         </div>
@@ -308,10 +308,11 @@
             const chatIdIndex = pathParts.indexOf('chat') + 1;
             const currentChatId = (chatIdIndex > 0 && pathParts[chatIdIndex]) ? pathParts[chatIdIndex] : '{{ current_chat_id }}';
             
+            // 1. Append the user's message
             appendMessage(message, 'user');
             userInput.value = '';
             
-            // UI State change to loading
+            // 2. UI State change to loading (Loading indicator is now correctly positioned after the new user message)
             loadingIndicator.classList.remove('hidden');
             userInput.disabled = true;
             sendButton.disabled = true;
@@ -327,6 +328,8 @@
                 const data = await response.json();
 
                 if (response.ok) {
+                    // 3. Remove loading indicator and append AI response
+                    loadingIndicator.classList.add('hidden');
                     appendMessage(data.response, 'model');
 
                     if (data.chat_id !== currentChatId) {
@@ -337,11 +340,13 @@
 
                 } else {
                     // Handle server errors
+                    loadingIndicator.classList.add('hidden');
                     appendMessage(`Error: ${data.error || 'Could not get response from AI.'}`, 'error');
                 }
 
             } catch (error) {
                 console.error('Fetch error:', error);
+                loadingIndicator.classList.add('hidden');
                 appendMessage('An unexpected network error occurred.', 'error');
             } finally {
                 // Reset UI state
@@ -374,7 +379,7 @@
             
             bubble.innerHTML = formattedText;
             messageContainer.appendChild(bubble);
-            chatWindow.insertBefore(messageContainer, scrollAnchor);
+            chatWindow.insertBefore(messageContainer, loadingIndicator); // Insert before loading indicator, which is before the anchor
         }
 
     </script>
