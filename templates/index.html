@@ -4,11 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Healthguru: AI Wellness Companion</title>
+    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter font (Professional and clean) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Load Lucide Icons for a professional look -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <!-- ================================================================= -->
+    <!-- CSS STYLES (Gemini-Inspired Dark Theme) -->
+    <!-- ================================================================= -->
     <style>
         /* Define color variables for the Gemini dark theme */
         :root {
@@ -18,6 +24,7 @@
             --color-accent-blue: #8ab4f8;     /* Subtle Gemini Blue Accent */
             --color-text-light: #e5e7eb;      /* Light Gray Text */
             --color-text-muted: #9ca3af;      /* Muted Gray Text */
+            --color-border: #37373f;          /* Subtle border color */
         }
 
         body {
@@ -33,20 +40,20 @@
 
         /* Message Bubbles - Minimal contrast for high readability */
         .message-bubble-user {
-            background-color: #2a2a32; /* Input/User bubble */
+            background-color: var(--color-bg-input); /* Input/User bubble */
             color: #ffffff;
             border-radius: 1rem 0.5rem 0.5rem 1rem;
             max-width: 90%;
             margin-left: auto;
-            border: 1px solid #37373f;
+            border: 1px solid var(--color-border);
         }
         .message-bubble-ai {
-            background-color: #131317; /* Sidebar/AI bubble */
+            background-color: var(--color-bg-sidebar); /* Sidebar/AI bubble */
             color: var(--color-text-light);
             border-radius: 0.5rem 1rem 1rem 0.5rem;
             max-width: 90%;
             margin-right: auto;
-            border: 1px solid #37373f;
+            border: 1px solid var(--color-border);
         }
         
         /* Layout Structure */
@@ -66,7 +73,6 @@
             margin-left: 300px; 
             transition: margin-left 0.3s ease-in-out;
             min-height: 100vh;
-            padding-top: 1rem;
         }
 
         /* Sidebar Collapse States */
@@ -76,8 +82,8 @@
         /* Context Menu Styling */
         #context-menu {
             position: fixed;
-            background: #2a2a32;
-            border: 1px solid #37373f;
+            background: var(--color-bg-input);
+            border: 1px solid var(--color-border);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
             border-radius: 0.5rem;
             z-index: 50;
@@ -107,9 +113,12 @@
 </head>
 <body id="body-container">
 
+    <!-- 1. HISTORY SIDEBAR -->
     <div id="history-sidebar" class="p-4 flex flex-col">
+        <!-- Logo/Title -->
         <h1 class="text-3xl font-bold accent-text mb-6 tracking-wide ml-2">Healthguru</h1>
         
+        <!-- New Chat Button -->
         <a href="/new_chat" class="w-full text-center accent-bg text-gray-900 font-semibold py-3 px-4 rounded-full shadow-lg mb-6 transition duration-150 ease-in-out transform hover:opacity-90 flex items-center justify-center space-x-2">
             <i data-lucide="plus" class="w-5 h-5"></i>
             <span>New Chat</span>
@@ -138,30 +147,40 @@
         </div>
     </div>
 
+    <!-- 2. MAIN CONTENT AREA -->
     <div id="main-content" class="min-h-screen flex flex-col">
 
+        <!-- HEADER / NAVIGATION -->
         <header class="p-4 bg-gray-900/50 sticky top-0 z-10 shadow-lg border-b border-gray-800 relative flex items-center max-w-5xl mx-auto w-full">
             
+            <!-- Toggle Button (Desktop/Tablet) -->
             <button id="sidebar-toggle-desktop" onclick="toggleSidebar()" class="text-gray-400 hover:text-gray-200 p-2 rounded-full transition duration-150 ease-in-out absolute left-2 top-1/2 transform -translate-y-1/2">
                 <i id="toggle-icon" data-lucide="chevrons-left" class="w-6 h-6"></i>
             </button>
 
+            <!-- Toggle Button (Mobile) -->
             <button id="sidebar-toggle-mobile" onclick="toggleSidebar()" class="text-gray-400 hover:text-gray-200 p-2 rounded-full transition duration-150 ease-in-out" style="display: none;">
                 <i data-lucide="menu" class="w-6 h-6"></i>
             </button>
             
+            <!-- Header Title -->
             <h1 class="text-lg font-medium text-gray-300 ml-12 sm:ml-16">Healthguru: AI Wellness Companion</h1>
             
         </header>
 
+        <!-- CHAT DISPLAY AREA -->
         <div id="chat-window" class="flex-grow p-6 space-y-6 overflow-y-auto max-w-5xl w-full mx-auto">
             
+            <!-- Greeting Message (Only shows if no messages exist) -->
+            {% if not messages %}
             <div class="flex justify-start">
                 <div class="message-bubble-ai p-4 text-sm">
                     Hello! I'm Healthguru, an AI trained to offer general health and wellness information. Please remember I am **not a medical professional**. Consult a doctor for personalized advice. How can I assist you today?
                 </div>
             </div>
+            {% endif %}
 
+            <!-- Existing Messages -->
             {% for message in messages %}
                 {% if message.role == 'user' %}
                     <div class="flex justify-end">
@@ -172,12 +191,13 @@
                 {% elif message.role == 'model' %}
                     <div class="flex justify-start">
                         <div class="message-bubble-ai p-4 whitespace-pre-wrap text-sm">
-                            {{ message.parts[0].text }}
+                            {{ message.parts[0].text | safe }}
                         </div>
                     </div>
                 {% endif %}
             {% endfor %}
 
+            <!-- Loading Indicator -->
             <div id="loading-indicator" class="flex justify-start hidden">
                 <div class="message-bubble-ai p-4">
                     <div class="flex items-center space-x-2">
@@ -189,9 +209,11 @@
                 </div>
             </div>
             
+            <!-- Scroll Anchor (Ensures bottom visibility) -->
             <div id="scroll-anchor"></div>
         </div>
 
+        <!-- INPUT FOOTER -->
         <div class="sticky bottom-0 bg-gray-900/90 backdrop-blur-sm p-4 border-t border-gray-800 shadow-2xl">
             <div class="max-w-5xl mx-auto flex space-x-4">
                 <input 
@@ -213,6 +235,7 @@
 
     </div>
 
+    <!-- 3. CONTEXT MENU (Hidden by default) -->
     <div id="context-menu" data-chat-id="">
         <div id="delete-option" class="context-item text-red-400 hover:text-red-300" onclick="showDeleteConfirmation()">
             <i data-lucide="trash-2" class="w-4 h-4 mr-3"></i>
@@ -220,6 +243,7 @@
         </div>
     </div>
 
+    <!-- 4. CONFIRMATION MODAL -->
     <div id="confirmation-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
         <div class="bg-gray-800 p-6 rounded-lg shadow-2xl max-w-sm w-full border border-gray-700">
             <h3 class="text-xl font-bold mb-4 text-red-400">Confirm Deletion</h3>
@@ -232,10 +256,14 @@
     </div>
 
 
+    <!-- ================================================================= -->
+    <!-- JAVASCRIPT LOGIC (Updated for Sidebar, Delete Feature, and new theme) -->
+    <!-- ================================================================= -->
     <script>
         // Initialize Lucide Icons
         lucide.createIcons();
 
+        // --- Global DOM Elements ---
         const chatWindow = document.getElementById('chat-window');
         const userInput = document.getElementById('user-input');
         const sendButton = document.getElementById('send-button');
@@ -247,16 +275,16 @@
         const toggleButtonDesktop = document.getElementById('sidebar-toggle-desktop');
         const toggleButtonMobile = document.getElementById('sidebar-toggle-mobile');
         
-        // Context Menu elements
+        // --- Context Menu Elements ---
         const contextMenu = document.getElementById('context-menu');
         const deleteModal = document.getElementById('confirmation-modal');
         let currentContextMenuChatId = null;
 
-
+        // --- State Variables ---
         let isMobile = window.innerWidth <= 768;
         let isSidebarOpen = !isMobile;
 
-        // Initialization and Event Handlers
+        // --- Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
             initializeLayout();
             window.addEventListener('resize', handleResize);
@@ -273,13 +301,13 @@
         contextMenu.addEventListener('contextmenu', (e) => e.preventDefault());
 
 
-        // --- Context Menu Logic ---
+        // --- NEW FEATURE: Context Menu Logic ---
         function setupChatHistoryContextMenu() {
             const historyItems = document.querySelectorAll('.chat-history-item');
             historyItems.forEach(item => {
                 item.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
-                    e.stopPropagation(); // Prevent the body click listener from closing it immediately
+                    e.stopPropagation(); // Prevent the body click listener
                     
                     currentContextMenuChatId = item.dataset.chatId;
                     
@@ -315,15 +343,13 @@
                 const data = await response.json();
 
                 if (response.ok && data.success) {
-                    // Redirect to the URL provided by the server (next chat or new chat)
+                    // Redirect to the URL provided by the server
                     window.location.href = data.redirect_url;
                 } else {
                     console.error('Failed to delete chat:', data.error);
-                    alertMessage('Failed to delete chat. Please try refreshing.', 'error');
                 }
             } catch (error) {
                 console.error('Network error during delete:', error);
-                alertMessage('A network error occurred during deletion.', 'error');
             } finally {
                 currentContextMenuChatId = null;
             }
@@ -348,12 +374,12 @@
             const wasMobile = isMobile;
             isMobile = window.innerWidth <= 768;
 
-            if (wasMobile !== isMobile) {
-                if (!isMobile) {
+            if (wasMobile !== isMobile) { // Only run if breakpoint is crossed
+                if (!isMobile) { // To Desktop
                     isSidebarOpen = true;
                     historySidebar.classList.remove('collapsed', 'active');
                     bodyContainer.classList.remove('sidebar-collapsed');
-                } else {
+                } else { // To Mobile
                     isSidebarOpen = false;
                     historySidebar.classList.add('collapsed');
                     historySidebar.classList.remove('active');
@@ -370,13 +396,25 @@
         }
 
         function updateToggleIcon() {
-            // Update Lucide icon based on sidebar state
+            if (isMobile) return; // Mobile uses a static hamburger
+            
+            // Update Lucide icon on desktop
             const iconName = isSidebarOpen ? 'chevrons-left' : 'chevrons-right';
-            const newIcon = lucide.createIcons()[iconName];
+            // Re-create the icon using Lucide's library
+            const iconElement = document.createElement('i');
+            iconElement.setAttribute('data-lucide', iconName);
+            iconElement.className = 'w-6 h-6';
+            
             if (toggleIcon) {
-                toggleIcon.innerHTML = newIcon.innerHTML;
+                toggleIcon.replaceWith(iconElement); // Replace old icon
+                lucide.createIcons({
+                    nodes: [iconElement] // Tell Lucide to render the new icon
+                });
+                // Update the global reference
+                window.toggleIcon = iconElement; 
             }
         }
+
 
         function toggleSidebar() {
             isSidebarOpen = !isSidebarOpen;
@@ -402,14 +440,11 @@
 
             const pathParts = window.location.pathname.split('/');
             const chatIdIndex = pathParts.indexOf('chat') + 1;
-            // Uses the current URL path chat ID, or the ID passed from the server template
             const currentChatId = (chatIdIndex > 0 && pathParts[chatIdIndex]) ? pathParts[chatIdIndex] : '{{ current_chat_id }}';
             
-            // 1. Append the user's message
             appendMessage(message, 'user');
             userInput.value = '';
             
-            // 2. UI State change to loading
             loadingIndicator.classList.remove('hidden');
             userInput.disabled = true;
             sendButton.disabled = true;
@@ -425,28 +460,26 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    // 3. Remove loading indicator and append AI response
                     loadingIndicator.classList.add('hidden');
                     appendMessage(data.response, 'model');
 
+                    // If this was the first message of a new chat, the server
+                    // created a new chat ID. We must redirect to keep the URL in sync.
                     if (data.chat_id !== currentChatId) {
-                        // Redirect if a new chat ID was created (first message on a new session)
                         window.location.href = '/chat/' + data.chat_id;
                         return;
                     }
 
                 } else {
-                    // Handle server errors
                     loadingIndicator.classList.add('hidden');
-                    alertMessage(`Error: ${data.error || 'Could not get response from AI.'}`, 'error');
+                    appendMessage(`Error: ${data.error || 'Could not get response from AI.'}`, 'error');
                 }
 
             } catch (error) {
                 console.error('Fetch error:', error);
                 loadingIndicator.classList.add('hidden');
-                alertMessage('An unexpected network error occurred.', 'error');
+                appendMessage('An unexpected network error occurred.', 'error');
             } finally {
-                // Reset UI state
                 loadingIndicator.classList.add('hidden');
                 userInput.disabled = false;
                 sendButton.disabled = false;
@@ -457,20 +490,7 @@
 
         function appendMessage(text, role) {
             const messageContainer = document.createElement('div');
-            const bubble = document.createElement('div');
-            
-            if (role === 'user') {
-                messageContainer.className = 'flex justify-end';
-                bubble.className = 'message-bubble-user p-4 whitespace-pre-wrap text-sm';
-            } else if (role === 'model') {
-                messageContainer.className = 'flex justify-start';
-                bubble.className = 'message-bubble-ai p-4 whitespace-pre-wrap text-sm';
-            } else if (role === 'error') {
-                // Distinct styling for error messages
-                bubble.className = 'p-4 whitespace-pre-wrap bg-red-800 text-white rounded-xl border border-red-700 text-sm';
-                messageContainer.className = 'flex justify-start';
-            }
-
+CSS
             // Simple markdown parsing for bold text
             const formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             
@@ -478,12 +498,6 @@
             messageContainer.appendChild(bubble);
             // Insert before scroll anchor
             chatWindow.insertBefore(messageContainer, scrollAnchor); 
-        }
-        
-        // Simple Alert Message replacement (Non-blocking)
-        function alertMessage(message, type) {
-            console.error(`${type.toUpperCase()}: ${message}`);
-            // You can implement a custom toast notification here if needed
         }
 
     </script>
