@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthguru AI Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <input type="hidden" id="current-chat-id" value="{{ current_chat_id }}">
+
+    <div class="app-layout">
+        
+        <div class="sidebar">
+            
+            <div class="sidebar-logo">Healthguru</div>
+            
+            <a href="{{ url_for('new_chat') }}" class="sidebar-item new-chat-btn">New Chat</a>
+            
+            <div class="sidebar-history" id="sidebar-history">
+                <div class="history-title">Recent</div>
+                
+                {% for chat in history %}
+                    {% include '_history_item.html' %}
+                {% endfor %}
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="sidebar-item disabled-item">Settings & Help</div>
+            </div>
+        </div>
+
+        <div class="chat-container">
+            
+            <div class="chat-header">
+                Healthguru: Your AI Wellness Companion
+                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+                    ☀️
+                </button>
+            </div>
+
+            <div class="chat-window" id="chat-window">
+                
+                <div class="message bot-message">
+                    Hello! I'm Healthguru, an AI trained to offer general health and wellness information. How can I assist you today?
+                </div>
+
+                {% for message in messages %}
+                    <div class="message {{ message.role }}-message">
+                        {{ message.parts[0].text }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+            <div class="input-area" id="chat-form">
+                <input type="text" id="user-input" placeholder="Ask your health question..." 
+                       onkeydown="if (event.key === 'Enter') { sendMessage(); }">
+                
+                <button onclick="sendMessage()">Send</button>
+            </div>
+
+        </div> </div> <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
