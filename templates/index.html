@@ -12,8 +12,11 @@
     <!-- Load Lucide Icons for a professional look -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <!-- Load marked library for client-side markdown parsing (CRITICAL FIX) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <!-- ================================================================= -->
-    <!-- CSS STYLES (Modern & Professional Dark Theme) -->
+    <!-- CSS STYLES (Restored Professional Dark Theme) -->
     <!-- ================================================================= -->
     <style>
         /* Define color variables for a clean, modern dark theme */
@@ -21,7 +24,7 @@
             --color-bg-base: #0f0f0f;         /* Almost black base */
             --color-bg-sidebar: #191919;      /* Darker gray for Sidebar */
             --color-bg-chat: #242424;         /* Slightly lighter for chat input/bubbles */
-            --color-accent-teal: #10b981;     /* Vibrant Teal/Emerald Accent (New Chat Button, Send) */
+            --color-accent-blue: #4f46e5;     /* Restored Indigo/Blue Accent */
             --color-text-primary: #e5e7eb;    /* Light Gray Text */
             --color-text-muted: #a1a1aa;      /* Zinc Gray Muted Text */
             --color-border: #3f3f46;          /* Zinc border color */
@@ -34,10 +37,10 @@
             overflow-x: hidden;
         }
 
-        /* Utility classes using the variables */
-        .accent-bg { background-color: var(--color-accent-teal); }
-        .accent-bg:hover { background-color: #059669; } 
-        .accent-text { color: var(--color-accent-teal); }
+        /* Utility classes using the variables - RESTORED ACCENT */
+        .accent-bg { background-color: var(--color-accent-blue); }
+        .accent-bg:hover { background-color: #4338ca; } 
+        .accent-text { color: var(--color-accent-blue); }
 
         /* Scrollbar styling (for a cleaner look) */
         .overflow-y-auto::-webkit-scrollbar {
@@ -69,6 +72,32 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         
+        /* IMPORTANT: Markdown Rendering Styles (Kept the fix) */
+        .message-bubble-ai > * {
+            margin-top: 1em;
+            margin-bottom: 1em;
+        }
+        .message-bubble-ai h1, .message-bubble-ai h2, .message-bubble-ai h3 {
+            font-weight: 600;
+            margin-top: 1.5em;
+        }
+        .message-bubble-ai ul, .message-bubble-ai ol {
+            padding-left: 1.5em;
+            margin-top: 0.5em;
+            margin-bottom: 0.5em;
+        }
+        .message-bubble-ai li {
+            margin-bottom: 0.25em;
+        }
+        .message-bubble-ai p:first-child {
+            margin-top: 0;
+        }
+        .message-bubble-ai p:last-child {
+            margin-bottom: 0;
+        }
+        /* End Markdown Rendering Styles */
+
+
         /* Layout Structure */
         #history-sidebar {
             width: 300px; 
@@ -125,8 +154,8 @@
         
         /* Input Focus Style */
         #user-input:focus {
-             box-shadow: 0 0 0 2px var(--color-accent-teal), 0 1px 2px rgba(0, 0, 0, 0.05);
-             border-color: var(--color-accent-teal);
+             box-shadow: 0 0 0 2px var(--color-accent-blue), 0 1px 2px rgba(0, 0, 0, 0.05);
+             border-color: var(--color-accent-blue);
         }
 
         /* Mobile Adjustments */
@@ -147,7 +176,7 @@
         <h1 class="text-3xl font-extrabold accent-text mb-6 tracking-tight ml-2">Healthguru</h1>
         
         <!-- New Chat Button -->
-        <a href="/new_chat" class="w-full text-center accent-bg text-gray-900 font-semibold py-3 px-4 rounded-xl shadow-lg mb-6 transition duration-150 ease-in-out transform hover:shadow-xl flex items-center justify-center space-x-2">
+        <a href="/new_chat" class="w-full text-center accent-bg text-white font-semibold py-3 px-4 rounded-xl shadow-lg mb-6 transition duration-150 ease-in-out transform hover:shadow-xl flex items-center justify-center space-x-2">
             <i data-lucide="plus" class="w-5 h-5"></i>
             <span>New Chat</span>
         </a>
@@ -224,20 +253,21 @@
                         </div>
                     {% elif message.role == 'model' %}
                         <div class="flex justify-start">
-                            <div class="message-bubble-ai p-4 whitespace-pre-wrap text-base shadow-md">
-                                {{ message.parts[0].text | safe }}
+                            <div class="message-bubble-ai p-4 text-base shadow-md markdown-content" 
+                                 data-raw-content="{{ message.parts[0].text | escape }}">
+                                <!-- Content will be populated by JS -->
                             </div>
                         </div>
                     {% endif %}
                 {% endfor %}
 
-                <!-- Loading Indicator -->
+                <!-- Loading Indicator (CRITICAL: Placed correctly at the bottom, before the anchor) -->
                 <div id="loading-indicator" class="flex justify-start hidden">
                     <div class="message-bubble-ai p-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
                             <div class="w-3 h-3 bg-yellow-400 rounded-full animate-pulse delay-75"></div>
-                            <div class="w-3 h-3 bg-teal-400 rounded-full animate-pulse delay-150"></div>
+                            <div class="w-3 h-3 bg-indigo-400 rounded-full animate-pulse delay-150"></div>
                             <span class="text-sm font-medium text-gray-400">Healthguru is thinking...</span>
                         </div>
                     </div>
@@ -297,11 +327,18 @@
 
 
     <!-- ================================================================= -->
-    <!-- JAVASCRIPT LOGIC (Unchanged functionality, just visual updates) -->
+    <!-- JAVASCRIPT LOGIC (Color agnostic, functionality only) -->
     <!-- ================================================================= -->
     <script>
         // Initialize Lucide Icons
         lucide.createIcons();
+        
+        // Configure marked to render markdown safely
+        marked.setOptions({
+            gfm: true, // Use GitHub flavored markdown
+            breaks: true, // Use <br> for single newlines
+            sanitize: true, // Sanitize the output HTML
+        });
 
         // --- Global DOM Elements ---
         const chatWindow = document.getElementById('chat-window');
@@ -328,6 +365,14 @@
         document.addEventListener('DOMContentLoaded', () => {
             initializeLayout();
             window.addEventListener('resize', handleResize);
+            // CRITICAL FIX: Parse all existing AI messages on page load
+            document.querySelectorAll('.markdown-content').forEach(el => {
+                const rawContent = el.getAttribute('data-raw-content');
+                if (rawContent) {
+                    el.innerHTML = marked.parse(rawContent);
+                }
+            });
+
             scrollToBottom();
             setupChatHistoryContextMenu();
             
@@ -500,6 +545,7 @@
             sendButton.disabled = false;
             // Use opacity for the disabled state on the button
             sendButton.classList.remove('opacity-50', 'cursor-not-allowed'); 
+            loadingIndicator.classList.add('hidden'); // Ensure loading indicator is hidden
             userInput.focus();
             scrollToBottom();
         }
@@ -508,6 +554,8 @@
             userInput.disabled = true;
             sendButton.disabled = true;
             sendButton.classList.add('opacity-50', 'cursor-not-allowed');
+            // CRITICAL FIX: Ensure loading indicator is placed at the very end
+            chatWindow.insertBefore(loadingIndicator, scrollAnchor); 
             loadingIndicator.classList.remove('hidden');
             scrollToBottom();
         }
@@ -523,9 +571,11 @@
             const chatIdIndex = pathParts.indexOf('chat') + 1;
             const currentChatId = (chatIdIndex > 0 && pathParts[chatIdIndex]) ? pathParts[chatIdIndex] : '{{ current_chat_id }}';
             
+            // 1. Append user message
             appendMessage(message, 'user');
             userInput.value = '';
             
+            // 2. Disable input and show loader (now correctly placed at the bottom)
             disableInputAndScroll();
             
             try {
@@ -538,6 +588,7 @@
                 const data = await response.json();
 
                 if (response.ok) {
+                    // 3. Hide loader and append AI message
                     loadingIndicator.classList.add('hidden');
                     appendMessage(data.response, 'model');
 
@@ -559,7 +610,7 @@
                 loadingIndicator.classList.add('hidden');
                 appendMessage('An unexpected network error occurred.', 'error');
             } finally {
-                // Ensure the input is reset and re-enabled here
+                // 4. Ensure the input is reset and re-enabled here
                 resetInputAndScroll(); 
             }
         }
@@ -571,34 +622,32 @@
             if (role === 'user') {
                 messageContainer.className = 'flex justify-end';
                 bubble.className = 'message-bubble-user p-4 text-base shadow-md';
+                bubble.innerText = text; // User messages are raw text
             } else { // model or error
                 messageContainer.className = 'flex justify-start';
-                bubble.className = 'message-bubble-ai p-4 text-base shadow-md whitespace-pre-wrap';
+                bubble.className = 'message-bubble-ai p-4 text-base shadow-md';
+                
                 if (role === 'error') {
                      // Error style: red background, white text
                      bubble.style.backgroundColor = '#991b1b'; 
                      bubble.style.color = '#fee2e2'; 
                      bubble.style.borderRadius = '0.5rem';
+                     bubble.innerText = text;
+                } else {
+                    // CRITICAL FIX: Parse the model's markdown response to HTML
+                    bubble.innerHTML = marked.parse(text); 
+                    bubble.classList.add('markdown-content');
                 }
             }
 
-            // Simple markdown parsing for bold text
-            // Note: Flask's Jinja2 templating already uses the `| safe` filter for messages from the model, 
-            // so we only apply basic formatting here for client-side user/error messages if needed,
-            // but the `whitespace-pre-wrap` ensures clean rendering of model text.
-            const formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            
-            bubble.innerHTML = formattedText;
             messageContainer.appendChild(bubble);
             // Insert before scroll anchor
             chatWindow.insertBefore(messageContainer, scrollAnchor); 
             
-            // Re-check for new icons if a message with an icon was appended
+            // Re-check for new icons (for model response)
             lucide.createIcons(); 
         }
 
     </script>
 </body>
 </html>
-
-
