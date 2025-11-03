@@ -7,47 +7,46 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
+    <script src="https://unpkg.com/lucide@latest"></script>
+
     <style>
-        /* Define color variables for easy theming */
+        /* Define color variables for the Gemini dark theme */
         :root {
-            --color-primary-navy: #131920;      /* Deep Navy Background */
-            --color-secondary-green: #4ade80;   /* Bright Green (Green-400/500) for accents/buttons */
-            --color-bg-sidebar: #1f2937;        /* Slightly lighter dark for sidebar/card elements (Gray-800) */
-            --color-bg-ai: #1f2937;             /* AI Bubble Background */
-            --color-bg-user: #374151;           /* User Bubble Background (Gray-700) */
-            --color-text-light: #e5e7eb;        /* Light Gray Text */
-            --color-border: #4b5563;            /* Subtle Border (Gray-600) */
+            --color-bg-primary: #1e1e24;      /* Deep Charcoal Gray Background */
+            --color-bg-sidebar: #131317;      /* Slightly darker for Sidebar/Base */
+            --color-bg-input: #2a2a32;        /* Darker gray for Input/Containers */
+            --color-accent-blue: #8ab4f8;     /* Subtle Gemini Blue Accent */
+            --color-text-light: #e5e7eb;      /* Light Gray Text */
+            --color-text-muted: #9ca3af;      /* Muted Gray Text */
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--color-primary-navy); 
+            background-color: var(--color-bg-primary); 
             color: var(--color-text-light);
             overflow-x: hidden;
         }
 
-        /* Utility classes based on variables */
-        .accent-bg { background-color: var(--color-secondary-green); }
-        .accent-bg:hover { background-color: #22c55e; } /* Green-600 equivalent */
-        .accent-text { color: var(--color-secondary-green); }
+        .accent-bg { background-color: var(--color-accent-blue); }
+        .accent-bg:hover { background-color: #79a5e8; } 
+        .accent-text { color: var(--color-accent-blue); }
 
-        /* Message Bubbles - Clean and Defined */
+        /* Message Bubbles - Minimal contrast for high readability */
         .message-bubble-user {
-            background-color: var(--color-bg-user);
+            background-color: #2a2a32; /* Input/User bubble */
             color: #ffffff;
-            border-radius: 1rem 1rem 0.5rem 1rem; /* More uniform, softer rounding */
+            border-radius: 1rem 0.5rem 0.5rem 1rem;
             max-width: 90%;
             margin-left: auto;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+            border: 1px solid #37373f;
         }
         .message-bubble-ai {
-            background-color: var(--color-bg-ai);
+            background-color: #131317; /* Sidebar/AI bubble */
             color: var(--color-text-light);
-            border-radius: 1rem 1rem 1rem 0.5rem;
+            border-radius: 0.5rem 1rem 1rem 0.5rem;
             max-width: 90%;
             margin-right: auto;
-            border: 1px solid var(--color-border); 
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            border: 1px solid #37373f;
         }
         
         /* Layout Structure */
@@ -60,7 +59,7 @@
             left: 0;
             height: 100%;
             z-index: 20;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.6);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.4);
         }
         
         #main-content {
@@ -74,6 +73,30 @@
         .sidebar-collapsed #main-content { margin-left: 0; }
         #history-sidebar.collapsed { transform: translateX(-300px); }
 
+        /* Context Menu Styling */
+        #context-menu {
+            position: fixed;
+            background: #2a2a32;
+            border: 1px solid #37373f;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            border-radius: 0.5rem;
+            z-index: 50;
+            display: none;
+            overflow: hidden;
+            min-width: 150px;
+        }
+        .context-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.1s;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+        .context-item:hover {
+            background-color: #37373f;
+        }
+
         /* Mobile Adjustments */
         @media (max-width: 768px) {
             #history-sidebar { width: 100%; transform: translateX(-100%); }
@@ -84,53 +107,54 @@
 </head>
 <body id="body-container">
 
-    <div id="history-sidebar" class="p-6 flex flex-col">
-        <h1 class="text-3xl font-bold accent-text mb-8 tracking-wide">Healthguru</h1>
+    <div id="history-sidebar" class="p-4 flex flex-col">
+        <h1 class="text-3xl font-bold accent-text mb-6 tracking-wide ml-2">Healthguru</h1>
         
-        <a href="/new_chat" class="w-full text-center accent-bg text-gray-900 font-bold py-3 px-4 rounded-xl shadow-lg mb-6 transition duration-150 ease-in-out transform hover:scale-[1.01]">
-            Start New Consultation
+        <a href="/new_chat" class="w-full text-center accent-bg text-gray-900 font-semibold py-3 px-4 rounded-full shadow-lg mb-6 transition duration-150 ease-in-out transform hover:opacity-90 flex items-center justify-center space-x-2">
+            <i data-lucide="plus" class="w-5 h-5"></i>
+            <span>New Chat</span>
         </a>
         
-        <h2 class="text-sm font-bold text-gray-400 uppercase mb-3 border-b border-gray-700 pb-2">History</h2>
+        <h2 class="text-xs font-bold text-gray-400 uppercase mb-3 border-b border-gray-800 pb-2 ml-2">Recent</h2>
         
         <div class="flex-grow overflow-y-auto pr-2">
             {% if recent_chats %}
                 {% for chat in recent_chats %}
-                    <a href="/chat/{{ chat.id }}" class="block w-full text-left {% if chat.id == current_chat_id %}bg-gray-700{% else %}hover:bg-gray-800{% endif %} py-2 px-3 rounded-lg mb-2 text-sm transition duration-100 ease-in-out truncate font-medium">
+                    <a 
+                        href="/chat/{{ chat.id }}" 
+                        data-chat-id="{{ chat.id }}"
+                        class="chat-history-item block w-full text-left {% if chat.id == current_chat_id %}bg-gray-700/50{% else %}hover:bg-gray-800/50{% endif %} py-2 px-3 rounded-lg mb-2 text-sm transition duration-100 ease-in-out truncate font-medium text-white/90"
+                    >
                         {{ chat.title }}
                     </a>
                 {% endfor %}
             {% else %}
-                <p class="text-gray-500 text-sm italic py-2">No recent chats.</p>
+                <p class="text-gray-500 text-sm italic py-2 ml-2">Start a new chat to see history.</p>
             {% endif %}
         </div>
         
         <div class="mt-6 pt-4 border-t border-gray-800">
-            <p class="text-xs text-gray-500 hover:text-gray-400 cursor-pointer transition">© 2025 Healthguru AI</p>
+            <p class="text-xs text-gray-500 hover:text-gray-400 cursor-pointer transition ml-2">Settings & Help</p>
         </div>
     </div>
 
     <div id="main-content" class="min-h-screen flex flex-col">
 
-        <header class="p-4 bg-gray-900/80 sticky top-0 z-10 shadow-xl border-b border-gray-800 relative flex items-center">
+        <header class="p-4 bg-gray-900/50 sticky top-0 z-10 shadow-lg border-b border-gray-800 relative flex items-center max-w-5xl mx-auto w-full">
             
-            <button id="sidebar-toggle-desktop" onclick="toggleSidebar()" class="text-gray-400 hover:text-green-400 p-2 rounded-full transition duration-150 ease-in-out absolute left-2 top-1/2 transform -translate-y-1/2">
-                <svg id="toggle-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
+            <button id="sidebar-toggle-desktop" onclick="toggleSidebar()" class="text-gray-400 hover:text-gray-200 p-2 rounded-full transition duration-150 ease-in-out absolute left-2 top-1/2 transform -translate-y-1/2">
+                <i id="toggle-icon" data-lucide="chevrons-left" class="w-6 h-6"></i>
             </button>
 
-            <button id="sidebar-toggle-mobile" onclick="toggleSidebar()" class="text-gray-400 hover:text-green-400 p-2 rounded-full transition duration-150 ease-in-out" style="display: none;">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" />
-                </svg>
+            <button id="sidebar-toggle-mobile" onclick="toggleSidebar()" class="text-gray-400 hover:text-gray-200 p-2 rounded-full transition duration-150 ease-in-out" style="display: none;">
+                <i data-lucide="menu" class="w-6 h-6"></i>
             </button>
             
-            <h1 class="text-xl font-medium text-gray-300 ml-12 sm:ml-16">Healthguru: Your AI Wellness Companion</h1>
+            <h1 class="text-lg font-medium text-gray-300 ml-12 sm:ml-16">Healthguru: AI Wellness Companion</h1>
             
         </header>
 
-        <div id="chat-window" class="flex-grow p-6 space-y-6 overflow-y-auto max-w-4xl w-full mx-auto">
+        <div id="chat-window" class="flex-grow p-6 space-y-6 overflow-y-auto max-w-5xl w-full mx-auto">
             
             <div class="flex justify-start">
                 <div class="message-bubble-ai p-4 text-sm">
@@ -157,10 +181,10 @@
             <div id="loading-indicator" class="flex justify-start hidden">
                 <div class="message-bubble-ai p-4">
                     <div class="flex items-center space-x-2">
-                        <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                        <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse delay-75"></div>
-                        <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse delay-150"></div>
-                        <span class="text-sm font-medium text-gray-300">Healthguru is formulating its response...</span>
+                        <div class="w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
+                        <div class="w-3 h-3 bg-blue-400 rounded-full animate-pulse delay-75"></div>
+                        <div class="w-3 h-3 bg-blue-400 rounded-full animate-pulse delay-150"></div>
+                        <span class="text-sm font-medium text-gray-400">Healthguru is thinking...</span>
                     </div>
                 </div>
             </div>
@@ -169,18 +193,18 @@
         </div>
 
         <div class="sticky bottom-0 bg-gray-900/90 backdrop-blur-sm p-4 border-t border-gray-800 shadow-2xl">
-            <div class="max-w-4xl mx-auto flex space-x-4">
+            <div class="max-w-5xl mx-auto flex space-x-4">
                 <input 
                     type="text" 
                     id="user-input" 
                     placeholder="Ask your health question..." 
-                    class="flex-grow p-4 rounded-xl bg-gray-800 text-white border border-gray-700 focus:ring-green-400 focus:border-green-400 transition duration-200 ease-in-out shadow-inner"
+                    class="flex-grow p-4 rounded-xl bg-gray-800 text-white border border-gray-700 focus:ring-blue-400 focus:border-blue-400 transition duration-200 ease-in-out shadow-inner"
                     onkeypress="if(event.key === 'Enter') { sendMessage(); }"
                 >
                 <button 
                     onclick="sendMessage()" 
                     id="send-button"
-                    class="accent-bg hover:bg-green-600 text-gray-900 font-bold py-4 px-8 rounded-xl shadow-lg transition duration-200 ease-in-out transform hover:scale-[1.02]"
+                    class="accent-bg text-gray-900 font-bold py-4 px-8 rounded-xl shadow-lg transition duration-200 ease-in-out transform hover:opacity-90"
                 >
                     Send
                 </button>
@@ -189,7 +213,29 @@
 
     </div>
 
+    <div id="context-menu" data-chat-id="">
+        <div id="delete-option" class="context-item text-red-400 hover:text-red-300" onclick="showDeleteConfirmation()">
+            <i data-lucide="trash-2" class="w-4 h-4 mr-3"></i>
+            Delete Chat
+        </div>
+    </div>
+
+    <div id="confirmation-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-2xl max-w-sm w-full border border-gray-700">
+            <h3 class="text-xl font-bold mb-4 text-red-400">Confirm Deletion</h3>
+            <p class="text-gray-300 mb-6">Are you sure you want to permanently delete this chat? This cannot be undone.</p>
+            <div class="flex justify-end space-x-4">
+                <button onclick="hideDeleteConfirmation()" class="px-4 py-2 text-gray-300 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                <button id="confirm-delete-button" onclick="confirmDeleteChat()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-semibold">Delete</button>
+            </div>
+        </div>
+    </div>
+
+
     <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
         const chatWindow = document.getElementById('chat-window');
         const userInput = document.getElementById('user-input');
         const sendButton = document.getElementById('send-button');
@@ -200,6 +246,12 @@
         const toggleIcon = document.getElementById('toggle-icon');
         const toggleButtonDesktop = document.getElementById('sidebar-toggle-desktop');
         const toggleButtonMobile = document.getElementById('sidebar-toggle-mobile');
+        
+        // Context Menu elements
+        const contextMenu = document.getElementById('context-menu');
+        const deleteModal = document.getElementById('confirmation-modal');
+        let currentContextMenuChatId = null;
+
 
         let isMobile = window.innerWidth <= 768;
         let isSidebarOpen = !isMobile;
@@ -209,7 +261,76 @@
             initializeLayout();
             window.addEventListener('resize', handleResize);
             scrollToBottom();
+            setupChatHistoryContextMenu();
         });
+        
+        // Close context menu on any click outside
+        document.addEventListener('click', () => {
+            contextMenu.style.display = 'none';
+        });
+        
+        // Prevent context menu from showing standard browser menu
+        contextMenu.addEventListener('contextmenu', (e) => e.preventDefault());
+
+
+        // --- Context Menu Logic ---
+        function setupChatHistoryContextMenu() {
+            const historyItems = document.querySelectorAll('.chat-history-item');
+            historyItems.forEach(item => {
+                item.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation(); // Prevent the body click listener from closing it immediately
+                    
+                    currentContextMenuChatId = item.dataset.chatId;
+                    
+                    // Position and display the custom menu
+                    contextMenu.style.left = `${e.clientX}px`;
+                    contextMenu.style.top = `${e.clientY}px`;
+                    contextMenu.style.display = 'block';
+                });
+            });
+        }
+
+        function showDeleteConfirmation() {
+            contextMenu.style.display = 'none';
+            deleteModal.classList.remove('hidden');
+        }
+
+        function hideDeleteConfirmation() {
+            deleteModal.classList.add('hidden');
+            currentContextMenuChatId = null;
+        }
+
+        async function confirmDeleteChat() {
+            if (!currentContextMenuChatId) return;
+
+            deleteModal.classList.add('hidden');
+            
+            try {
+                const response = await fetch(`/delete_chat/${currentContextMenuChatId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Redirect to the URL provided by the server (next chat or new chat)
+                    window.location.href = data.redirect_url;
+                } else {
+                    console.error('Failed to delete chat:', data.error);
+                    alertMessage('Failed to delete chat. Please try refreshing.', 'error');
+                }
+            } catch (error) {
+                console.error('Network error during delete:', error);
+                alertMessage('A network error occurred during deletion.', 'error');
+            } finally {
+                currentContextMenuChatId = null;
+            }
+        }
+
+
+        // --- Layout and UI Toggle Logic ---
 
         function initializeLayout() {
             if (isMobile) {
@@ -249,11 +370,11 @@
         }
 
         function updateToggleIcon() {
-            if (!isMobile) {
-                // Desktop Icon: Arrow
-                toggleIcon.innerHTML = isSidebarOpen
-                    ? `<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />` 
-                    : `<path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />`;
+            // Update Lucide icon based on sidebar state
+            const iconName = isSidebarOpen ? 'chevrons-left' : 'chevrons-right';
+            const newIcon = lucide.createIcons()[iconName];
+            if (toggleIcon) {
+                toggleIcon.innerHTML = newIcon.innerHTML;
             }
         }
 
@@ -281,13 +402,14 @@
 
             const pathParts = window.location.pathname.split('/');
             const chatIdIndex = pathParts.indexOf('chat') + 1;
+            // Uses the current URL path chat ID, or the ID passed from the server template
             const currentChatId = (chatIdIndex > 0 && pathParts[chatIdIndex]) ? pathParts[chatIdIndex] : '{{ current_chat_id }}';
             
             // 1. Append the user's message
             appendMessage(message, 'user');
             userInput.value = '';
             
-            // 2. UI State change to loading (Loading indicator is now correctly positioned after the new user message)
+            // 2. UI State change to loading
             loadingIndicator.classList.remove('hidden');
             userInput.disabled = true;
             sendButton.disabled = true;
@@ -308,7 +430,7 @@
                     appendMessage(data.response, 'model');
 
                     if (data.chat_id !== currentChatId) {
-                        // Redirect if a new chat ID was created (first message)
+                        // Redirect if a new chat ID was created (first message on a new session)
                         window.location.href = '/chat/' + data.chat_id;
                         return;
                     }
@@ -316,13 +438,13 @@
                 } else {
                     // Handle server errors
                     loadingIndicator.classList.add('hidden');
-                    appendMessage(`Error: ${data.error || 'Could not get response from AI.'}`, 'error');
+                    alertMessage(`Error: ${data.error || 'Could not get response from AI.'}`, 'error');
                 }
 
             } catch (error) {
                 console.error('Fetch error:', error);
                 loadingIndicator.classList.add('hidden');
-                appendMessage('An unexpected network error occurred.', 'error');
+                alertMessage('An unexpected network error occurred.', 'error');
             } finally {
                 // Reset UI state
                 loadingIndicator.classList.add('hidden');
@@ -354,8 +476,14 @@
             
             bubble.innerHTML = formattedText;
             messageContainer.appendChild(bubble);
-            // Insert before loading indicator
-            chatWindow.insertBefore(messageContainer, loadingIndicator); 
+            // Insert before scroll anchor
+            chatWindow.insertBefore(messageContainer, scrollAnchor); 
+        }
+        
+        // Simple Alert Message replacement (Non-blocking)
+        function alertMessage(message, type) {
+            console.error(`${type.toUpperCase()}: ${message}`);
+            // You can implement a custom toast notification here if needed
         }
 
     </script>
