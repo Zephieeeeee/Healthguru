@@ -6,171 +6,153 @@
     <title>Healthguru: AI Wellness Companion</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Inter font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Inter font (Professional and clean) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- CSS STYLES -->
+    <!-- ================================================================= -->
+    <!-- CSS STYLES (Cleaned and Modularized) -->
+    <!-- ================================================================= -->
     <style>
-        /* Custom styles for dark theme and responsiveness */
+        /* Define color variables for easy theming */
+        :root {
+            --color-primary: #2563eb; /* Indigo-600 */
+            --color-secondary: #2dd4bf; /* Teal-400 */
+            --color-bg-dark: #0d1117; 
+            --color-bg-sidebar: #161b22;
+            --color-bg-ai: #161b22;
+            --color-bg-user: #1f2937;
+            --color-text-light: #e5e7eb;
+            --color-border: #30363d;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #1a1a1a; /* Dark background */
-            color: #f1f1f1; /* Light text */
-            overflow-x: hidden; /* Prevent horizontal scrolling */
+            background-color: var(--color-bg-dark); 
+            color: var(--color-text-light);
+            overflow-x: hidden;
         }
-        /* Message Bubbles - DARK BLUE THEME */
+
+        /* Utility classes based on variables */
+        .accent-bg { background-color: var(--color-primary); }
+        .accent-bg:hover { background-color: #1d4ed8; } /* Indigo-700 equivalent */
+        .accent-text { color: var(--color-secondary); }
+
+        /* Message Bubbles - Refined Contrast and Shapes */
         .message-bubble-user {
-            /* User: Dark, subtle blue-gray */
-            background-color: #2d3748; 
+            background-color: var(--color-bg-user);
             color: #ffffff;
-            border-radius: 1rem 1rem 0.25rem 1rem;
+            border-radius: 1rem 1rem 0.5rem 1.5rem; 
             max-width: 90%;
             margin-left: auto;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
         .message-bubble-ai {
-            /* AI: Darker grey */
-            background-color: #242424; 
-            color: #f1f1f1;
-            border-radius: 1rem 1rem 1rem 0.25rem;
+            background-color: var(--color-bg-ai);
+            color: var(--color-text-light);
+            border-radius: 1rem 1rem 1.5rem 0.5rem;
             max-width: 90%;
             margin-right: auto;
-            border: 1px solid #333;
+            border: 1px solid var(--color-border); 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
-        /* Sidebar Styling (History Panel) */
+        
+        /* Layout Structure */
         #history-sidebar {
             width: 300px; 
-            background-color: #1f1f1f; /* Sidebar background, matching the original */
-            transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
+            background-color: var(--color-bg-sidebar); 
+            transition: transform 0.3s ease-in-out;
             position: fixed;
             top: 0;
             left: 0;
             height: 100%;
             z-index: 20;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.6);
         }
         
-        /* Main Content Area */
         #main-content {
-            margin-left: 300px; /* Offset by sidebar width on desktop */
+            margin-left: 300px; 
             transition: margin-left 0.3s ease-in-out;
             min-height: 100vh;
             padding-top: 1rem;
         }
 
-        /* Hidden State for Sidebar (Desktop) */
-        #history-sidebar.collapsed {
-            transform: translateX(-300px);
-        }
-
-        /* Shift content when sidebar is hidden */
-        .sidebar-collapsed #main-content {
-            margin-left: 0;
-        }
+        /* Sidebar Collapse States */
+        .sidebar-collapsed #main-content { margin-left: 0; }
+        #history-sidebar.collapsed { transform: translateX(-300px); }
 
         /* Mobile Adjustments */
         @media (max-width: 768px) {
-            #history-sidebar {
-                width: 100%;
-                transform: translateX(-100%);
-            }
-            #history-sidebar.active {
-                transform: translateX(0);
-            }
-            #main-content {
-                margin-left: 0;
-            }
-            /* Show the mobile hamburger button */
-            #sidebar-toggle-mobile {
-                display: block !important;
-            }
-            /* Hide the desktop chevron on mobile */
-            #sidebar-toggle-desktop {
-                display: none !important;
-            }
+            #history-sidebar { width: 100%; transform: translateX(-100%); }
+            #history-sidebar.active { transform: translateX(0); }
+            #main-content { margin-left: 0; }
         }
-        
-        /* Desktop Toggle Button Position */
-        #sidebar-toggle-desktop {
-            position: absolute;
-            left: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 30;
-            display: block; 
-        }
-        
-        /* Adjust header content to not overlap the button */
-        .main-header-content {
-            /* Pushes title away from the chevron icon */
-            margin-left: 40px; 
-        }
-
     </style>
 </head>
 <body id="body-container">
 
     <!-- 1. HISTORY SIDEBAR -->
-    <div id="history-sidebar" class="p-4 flex flex-col">
-        <!-- Sidebar header uses the new CYAN accent color -->
-        <h1 class="text-3xl font-bold text-cyan-500 mb-6">Healthguru</h1>
+    <div id="history-sidebar" class="p-6 flex flex-col">
+        <!-- Logo/Title -->
+        <h1 class="text-3xl font-bold accent-text mb-8 tracking-wide">Healthguru</h1>
         
-        <a href="/new_chat" class="w-full text-center bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md mb-6 transition duration-150 ease-in-out">
-            New Chat
+        <!-- New Chat Button -->
+        <a href="/new_chat" class="w-full text-center accent-bg text-white font-semibold py-3 px-4 rounded-xl shadow-lg mb-6 transition duration-150 ease-in-out transform hover:scale-[1.01]">
+            Start New Consultation
         </a>
         
-        <h2 class="text-lg font-semibold text-gray-400 mb-2 border-b border-gray-700 pb-1">Recent</h2>
+        <h2 class="text-sm font-bold text-gray-400 uppercase mb-3 border-b border-gray-700 pb-2">History</h2>
         
-        <div class="flex-grow overflow-y-auto">
+        <div class="flex-grow overflow-y-auto pr-2">
             {% if recent_chats %}
                 {% for chat in recent_chats %}
-                    <a href="/chat/{{ chat.id }}" class="block w-full text-left {% if chat.id == current_chat_id %}bg-gray-700{% else %}hover:bg-gray-800{% endif %} py-2 px-3 rounded-lg mb-2 text-sm transition duration-100 ease-in-out truncate">
+                    <a href="/chat/{{ chat.id }}" class="block w-full text-left {% if chat.id == current_chat_id %}bg-gray-700{% else %}hover:bg-gray-800{% endif %} py-2 px-3 rounded-lg mb-2 text-sm transition duration-100 ease-in-out truncate font-medium">
                         {{ chat.title }}
                     </a>
                 {% endfor %}
             {% else %}
-                <p class="text-gray-500 text-sm italic">Start a new chat to see history.</p>
+                <p class="text-gray-500 text-sm italic py-2">No recent chats.</p>
             {% endif %}
         </div>
         
-        <div class="mt-4 pt-4 border-t border-gray-700">
-            <p class="text-sm text-gray-500 hover:text-gray-400 cursor-pointer">Settings & Help</p>
+        <div class="mt-6 pt-4 border-t border-gray-800">
+            <p class="text-xs text-gray-500 hover:text-gray-400 cursor-pointer transition">© 2025 Healthguru AI</p>
         </div>
     </div>
 
     <!-- 2. MAIN CONTENT AREA -->
     <div id="main-content" class="min-h-screen flex flex-col">
 
-        <!-- HEADER / NAVIGATION (uses a dark background) -->
-        <header class="p-4 bg-black/50 sticky top-0 z-10 shadow-lg relative flex items-center">
+        <!-- HEADER / NAVIGATION -->
+        <header class="p-4 bg-gray-900/80 sticky top-0 z-10 shadow-xl border-b border-gray-800 relative flex items-center">
             
-            <!-- Toggle Button (Desktop/Tablet) - Updated hover color -->
-            <button id="sidebar-toggle-desktop" onclick="toggleSidebar()" class="text-white hover:text-cyan-400 p-2 rounded-full transition duration-150 ease-in-out">
-                <!-- Chevron Left Icon (Default state: Sidebar Visible) -->
+            <!-- Toggle Button (Desktop/Tablet) -->
+            <button id="sidebar-toggle-desktop" onclick="toggleSidebar()" class="text-gray-400 hover:text-teal-400 p-2 rounded-full transition duration-150 ease-in-out absolute left-2 top-1/2 transform -translate-y-1/2">
+                <!-- Chevron Icon placeholder -->
                 <svg id="toggle-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
                 </svg>
             </button>
 
-            <!-- Toggle Button (Mobile) - Updated hover color -->
-            <button id="sidebar-toggle-mobile" onclick="toggleSidebar()" class="text-white hover:text-cyan-400 p-2 rounded-full transition duration-150 ease-in-out" style="display: none;">
+            <!-- Toggle Button (Mobile) -->
+            <button id="sidebar-toggle-mobile" onclick="toggleSidebar()" class="text-gray-400 hover:text-teal-400 p-2 rounded-full transition duration-150 ease-in-out" style="display: none;">
                 <!-- Hamburger Icon -->
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" />
                 </svg>
             </button>
             
-            <!-- Header Title: Uses a lighter blue for contrast -->
-            <h1 class="text-xl font-semibold text-blue-300 main-header-content">Healthguru: Your AI Wellness Companion</h1>
+            <!-- Header Title -->
+            <h1 class="text-xl font-medium text-gray-300 ml-12 sm:ml-16">Healthguru: Your AI Wellness Companion</h1>
             
         </header>
 
         <!-- CHAT DISPLAY AREA -->
-        <div id="chat-window" class="flex-grow p-4 space-y-4 overflow-y-auto max-w-4xl w-full mx-auto">
+        <div id="chat-window" class="flex-grow p-6 space-y-6 overflow-y-auto max-w-4xl w-full mx-auto">
             
             <!-- Greeting Message -->
             <div class="flex justify-start">
-                <div class="message-bubble-ai p-3">
-                    Hello! I'm Healthguru, an AI trained to offer general health and wellness information. How can I assist you today?
+                <div class="message-bubble-ai p-4 text-sm">
+                    Hello! I'm Healthguru, an AI trained to offer general health and wellness information. Please remember I am **not a medical professional**. Consult a doctor for personalized advice. How can I assist you today?
                 </div>
             </div>
 
@@ -178,27 +160,27 @@
             {% for message in messages %}
                 {% if message.role == 'user' %}
                     <div class="flex justify-end">
-                        <div class="message-bubble-user p-3">
+                        <div class="message-bubble-user p-4 text-sm">
                             {{ message.parts[0].text }}
                         </div>
                     </div>
                 {% elif message.role == 'model' %}
                     <div class="flex justify-start">
-                        <div class="message-bubble-ai p-3 whitespace-pre-wrap">
+                        <div class="message-bubble-ai p-4 whitespace-pre-wrap text-sm">
                             {{ message.parts[0].text }}
                         </div>
                     </div>
                 {% endif %}
             {% endfor %}
 
-            <!-- Loading Indicator - Updated dot color -->
+            <!-- Loading Indicator -->
             <div id="loading-indicator" class="flex justify-start hidden">
-                <div class="message-bubble-ai p-3">
+                <div class="message-bubble-ai p-4">
                     <div class="flex items-center space-x-2">
-                        <div class="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></div>
-                        <div class="w-2 h-2 bg-cyan-500 rounded-full animate-pulse delay-75"></div>
-                        <div class="w-2 h-2 bg-cyan-500 rounded-full animate-pulse delay-150"></div>
-                        <span class="text-sm">Healthguru is thinking...</span>
+                        <div class="w-3 h-3 bg-teal-400 rounded-full animate-pulse"></div>
+                        <div class="w-3 h-3 bg-teal-400 rounded-full animate-pulse delay-75"></div>
+                        <div class="w-3 h-3 bg-teal-400 rounded-full animate-pulse delay-150"></div>
+                        <span class="text-sm font-medium text-gray-300">Healthguru is formulating its response...</span>
                     </div>
                 </div>
             </div>
@@ -208,19 +190,19 @@
         </div>
 
         <!-- INPUT FOOTER -->
-        <div class="sticky bottom-0 bg-black/80 backdrop-blur-sm p-4 border-t border-gray-800">
-            <div class="max-w-4xl mx-auto flex space-x-3">
+        <div class="sticky bottom-0 bg-gray-900/90 backdrop-blur-sm p-4 border-t border-gray-800 shadow-2xl">
+            <div class="max-w-4xl mx-auto flex space-x-4">
                 <input 
                     type="text" 
                     id="user-input" 
                     placeholder="Ask your health question..." 
-                    class="flex-grow p-3 rounded-xl bg-gray-800 text-white border border-gray-700 focus:ring-cyan-500 focus:border-cyan-500 transition duration-150 ease-in-out shadow-lg"
+                    class="flex-grow p-4 rounded-xl bg-gray-800 text-white border border-gray-700 focus:ring-teal-400 focus:border-teal-400 transition duration-200 ease-in-out shadow-inner"
                     onkeypress="if(event.key === 'Enter') { sendMessage(); }"
                 >
                 <button 
                     onclick="sendMessage()" 
                     id="send-button"
-                    class="bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition duration-150 ease-in-out transform hover:scale-105"
+                    class="accent-bg hover:bg-indigo-700 text-white font-semibold py-4 px-8 rounded-xl shadow-lg transition duration-200 ease-in-out transform hover:scale-[1.02]"
                 >
                     Send
                 </button>
@@ -229,7 +211,9 @@
 
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
+    <!-- ================================================================= -->
+    <!-- JAVASCRIPT LOGIC (Cleaned and Modularized) -->
+    <!-- ================================================================= -->
     <script>
         const chatWindow = document.getElementById('chat-window');
         const userInput = document.getElementById('user-input');
@@ -238,7 +222,6 @@
         const scrollAnchor = document.getElementById('scroll-anchor');
         const historySidebar = document.getElementById('history-sidebar');
         const bodyContainer = document.getElementById('body-container');
-        const mainContent = document.getElementById('main-content');
         const toggleIcon = document.getElementById('toggle-icon');
         const toggleButtonDesktop = document.getElementById('sidebar-toggle-desktop');
         const toggleButtonMobile = document.getElementById('sidebar-toggle-mobile');
@@ -246,8 +229,14 @@
         let isMobile = window.innerWidth <= 768;
         let isSidebarOpen = !isMobile;
 
-        // Initial setup on load
+        // Initialization and Event Handlers
         document.addEventListener('DOMContentLoaded', () => {
+            initializeLayout();
+            window.addEventListener('resize', handleResize);
+            scrollToBottom();
+        });
+
+        function initializeLayout() {
             if (isMobile) {
                 isSidebarOpen = false;
                 historySidebar.classList.add('collapsed');
@@ -257,22 +246,18 @@
             }
             updateToggleVisibility();
             updateToggleIcon();
-            scrollToBottom();
-        });
+        }
 
-        // Handle window resize
-        window.addEventListener('resize', () => {
+        function handleResize() {
             const wasMobile = isMobile;
             isMobile = window.innerWidth <= 768;
 
             if (wasMobile !== isMobile) {
                 if (!isMobile) {
-                    // Transitioning to Desktop: Force open state
                     isSidebarOpen = true;
                     historySidebar.classList.remove('collapsed', 'active');
                     bodyContainer.classList.remove('sidebar-collapsed');
                 } else {
-                    // Transitioning to Mobile: Force closed state
                     isSidebarOpen = false;
                     historySidebar.classList.add('collapsed');
                     historySidebar.classList.remove('active');
@@ -281,53 +266,39 @@
                 updateToggleVisibility();
                 updateToggleIcon();
             }
-        });
+        }
 
         function updateToggleVisibility() {
-            if (isMobile) {
-                toggleButtonDesktop.style.display = 'none';
-                toggleButtonMobile.style.display = 'block';
-            } else {
-                toggleButtonDesktop.style.display = 'block';
-                toggleButtonMobile.style.display = 'none';
-            }
+            toggleButtonDesktop.style.display = isMobile ? 'none' : 'block';
+            toggleButtonMobile.style.display = isMobile ? 'block' : 'none';
         }
 
         function updateToggleIcon() {
             if (!isMobile) {
-                // Desktop icon: Arrow
-                if (isSidebarOpen) {
-                    // Open: Show chevron left
-                    toggleIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />`; 
-                } else {
-                    // Closed: Show chevron right
-                    toggleIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />`; 
-                }
+                // Desktop Icon: Arrow
+                toggleIcon.innerHTML = isSidebarOpen
+                    ? `<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />` 
+                    : `<path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />`;
             }
-            // Mobile icon (Hamburger) remains static
         }
-
 
         function toggleSidebar() {
             isSidebarOpen = !isSidebarOpen;
             
             if (isMobile) {
-                // Mobile: Use 'active' class (full-screen overlay)
                 historySidebar.classList.toggle('active');
             } else {
-                // Desktop: Toggle 'collapsed' on sidebar and 'sidebar-collapsed' on body
                 historySidebar.classList.toggle('collapsed');
                 bodyContainer.classList.toggle('sidebar-collapsed');
             }
-
             updateToggleIcon();
         }
-
-        // --- Chat Logic ---
 
         function scrollToBottom() {
             scrollAnchor.scrollIntoView({ behavior: 'smooth' });
         }
+
+        // --- Core Chat Logic ---
 
         async function sendMessage() {
             const message = userInput.value.trim();
@@ -335,24 +306,21 @@
 
             const pathParts = window.location.pathname.split('/');
             const chatIdIndex = pathParts.indexOf('chat') + 1;
-            // Uses the current chat ID from the URL or the one passed from the server template
             const currentChatId = (chatIdIndex > 0 && pathParts[chatIdIndex]) ? pathParts[chatIdIndex] : '{{ current_chat_id }}';
             
             appendMessage(message, 'user');
             userInput.value = '';
             
+            // UI State change to loading
             loadingIndicator.classList.remove('hidden');
             userInput.disabled = true;
             sendButton.disabled = true;
             scrollToBottom();
             
             try {
-                // This assumes your Flask server is running on the same domain/port
                 const response = await fetch('/chat', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message: message, chat_id: currentChatId })
                 });
 
@@ -362,12 +330,13 @@
                     appendMessage(data.response, 'model');
 
                     if (data.chat_id !== currentChatId) {
-                        // If a new chat ID was created by the server, redirect
+                        // Redirect if a new chat ID was created (first message)
                         window.location.href = '/chat/' + data.chat_id;
                         return;
                     }
 
                 } else {
+                    // Handle server errors
                     appendMessage(`Error: ${data.error || 'Could not get response from AI.'}`, 'error');
                 }
 
@@ -375,6 +344,7 @@
                 console.error('Fetch error:', error);
                 appendMessage('An unexpected network error occurred.', 'error');
             } finally {
+                // Reset UI state
                 loadingIndicator.classList.add('hidden');
                 userInput.disabled = false;
                 sendButton.disabled = false;
@@ -389,12 +359,13 @@
             
             if (role === 'user') {
                 messageContainer.className = 'flex justify-end';
-                bubble.className = 'message-bubble-user p-3 whitespace-pre-wrap';
+                bubble.className = 'message-bubble-user p-4 whitespace-pre-wrap text-sm';
             } else if (role === 'model') {
                 messageContainer.className = 'flex justify-start';
-                bubble.className = 'message-bubble-ai p-3 whitespace-pre-wrap';
+                bubble.className = 'message-bubble-ai p-4 whitespace-pre-wrap text-sm';
             } else if (role === 'error') {
-                bubble.className = 'p-3 whitespace-pre-wrap bg-red-800 text-white rounded-lg border border-red-700';
+                // Distinct styling for error messages
+                bubble.className = 'p-4 whitespace-pre-wrap bg-red-800 text-white rounded-xl border border-red-700 text-sm';
                 messageContainer.className = 'flex justify-start';
             }
 
@@ -407,6 +378,5 @@
         }
 
     </script>
-
 </body>
 </html>
