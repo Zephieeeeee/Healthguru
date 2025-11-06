@@ -4,30 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Healthguru: AI Wellness Companion</title>
-    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Inter font (Professional and clean) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Load Lucide Icons for a professional look -->
     <script src="https://unpkg.com/lucide@latest"></script>
-
-    <!-- Load marked library for client-side markdown parsing -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
-    <!-- ================================================================= -->
-    <!-- CSS STYLES (Restored Professional Dark Theme) -->
-    <!-- ================================================================= -->
     <style>
-        /* Define color variables for a clean, modern dark theme */
         :root {
-            --color-bg-base: #0f0f0f;         /* Almost black base */
-            --color-bg-sidebar: #191919;      /* Darker gray for Sidebar */
-            --color-bg-chat: #242424;         /* Slightly lighter for chat input/bubbles */
-            --color-accent-blue: #4f46e5;     /* Indigo/Blue Accent */
-            --color-text-primary: #e5e7eb;    /* Light Gray Text */
-            --color-text-muted: #a1a1aa;      /* Zinc Gray Muted Text */
-            --color-border: #3f3f46;          /* Zinc border color */
+            --color-bg-base: #0f0f0f;         
+            --color-bg-sidebar: #191919;      
+            --color-bg-chat: #242424;
+            --color-accent-blue: #4f46e5;     
+            --color-text-primary: #e5e7eb;    
+            --color-text-muted: #a1a1aa;      
+            --color-border: #3f3f46;          
         }
 
         body {
@@ -37,42 +26,36 @@
             overflow-x: hidden;
         }
 
-        /* Utility classes using the variables */
         .accent-bg { background-color: var(--color-accent-blue); }
         .accent-bg:hover { background-color: #4338ca; } 
         .accent-text { color: var(--color-accent-blue); }
-
-        /* Scrollbar styling (for a cleaner look) */
         .overflow-y-auto::-webkit-scrollbar {
             width: 8px;
         }
         .overflow-y-auto::-webkit-scrollbar-thumb {
-            background-color: #3f3f46; /* Border/Zinc */
+            background-color: #3f3f46; 
             border-radius: 4px;
         }
         .overflow-y-auto::-webkit-scrollbar-thumb:hover {
             background-color: #52525b;
         }
-
-        /* Message Bubbles - Softer, less boxy */
         .message-bubble-user {
-            background-color: #3f3f46; /* User message uses a subtle dark gray */
+            background-color: #3f3f46; 
             color: #ffffff;
             border-radius: 1rem 0.5rem 0.5rem 1rem;
-            max-width: 80%; /* Slightly narrower max width */
+            max-width: 80%; 
             margin-left: auto;
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
         .message-bubble-ai {
-            background-color: var(--color-bg-chat); /* AI message uses the input gray */
+            background-color: var(--color-bg-chat); 
             color: var(--color-text-primary);
             border-radius: 0.5rem 1rem 1rem 0.5rem;
-            max-width: 80%; /* Slightly narrower max width */
+            max-width: 80%; 
             margin-right: auto;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         
-        /* IMPORTANT: Markdown Rendering Styles (Kept the fix) */
         .message-bubble-ai > * {
             margin-top: 1em;
             margin-bottom: 1em;
@@ -95,10 +78,7 @@
         .message-bubble-ai p:last-child {
             margin-bottom: 0;
         }
-        /* End Markdown Rendering Styles */
-
-
-        /* Layout Structure */
+       
         #history-sidebar {
             width: 300px; 
             background-color: var(--color-bg-sidebar); 
@@ -123,11 +103,11 @@
         }
 
 
-        /* Sidebar Collapse States */
+       
         .sidebar-collapsed #main-content { margin-left: 0; }
         #history-sidebar.collapsed { transform: translateX(-300px); }
 
-        /* Context Menu Styling (Cleaned up) */
+        
         #context-menu {
             position: fixed;
             background: #242424;
@@ -151,13 +131,13 @@
             background-color: #37373f;
         }
         
-        /* Input Focus Style */
+        
         #user-input:focus {
              box-shadow: 0 0 0 2px var(--color-accent-blue), 0 1px 2px rgba(0, 0, 0, 0.05);
              border-color: var(--color-accent-blue);
         }
 
-        /* Mobile Adjustments */
+       
         @media (max-width: 768px) {
             #history-sidebar { width: 100%; transform: translateX(-100%); }
             #history-sidebar.active { transform: translateX(0); }
@@ -168,15 +148,15 @@
 </head>
 <body id="body-container">
 
-    <!-- 1. HISTORY SIDEBAR -->
+  
     <div id="history-sidebar" class="p-4 flex flex-col">
-        <!-- Logo/Title - RESTORED HEALTHGURU TEXT -->
+
         <h1 class="text-3xl font-extrabold accent-text mb-6 tracking-tight ml-2">Healthguru</h1>
         
-        <!-- New Chat Button - UPDATED TEXT -->
+     
         <a href="/new_chat" class="w-full text-center accent-bg text-white font-semibold py-3 px-4 rounded-xl shadow-lg mb-6 transition duration-150 ease-in-out transform hover:shadow-xl flex items-center justify-center space-x-2">
             <i data-lucide="plus" class="w-5 h-5"></i>
-            <!-- TEXT CHANGED TO "New Chat" -->
+       
             <span>New Chat</span>
         </a>
         
@@ -190,7 +170,7 @@
                         data-chat-id="{{ chat.id }}"
                         class="chat-history-item block w-full text-left {% if chat.id == current_chat_id %}bg-indigo-900/40 border border-indigo-700/50{% else %}hover:bg-gray-800/50{% endif %} py-2 px-3 rounded-lg mb-1 text-sm transition duration-100 ease-in-out truncate font-medium text-white/90"
                     >
-                        <!-- Title is rendered here. It will now be dynamic -->
+                        
                         {{ chat.title }}
                     </a>
                 {% endfor %}
@@ -207,32 +187,31 @@
         </div>
     </div>
 
-    <!-- 2. MAIN CONTENT AREA -->
+   
     <div id="main-content" class="min-h-screen flex flex-col">
 
-        <!-- HEADER / NAVIGATION (Sleek, Centered Look) -->
+      
         <header class="p-4 bg-transparent sticky top-0 z-10 border-b border-gray-800/50 relative flex items-center justify-center w-full">
             
-            <!-- Toggle Button (Desktop/Tablet) -->
+         
             <button id="sidebar-toggle-desktop" onclick="toggleSidebar()" class="text-gray-400 hover:text-gray-200 p-2 rounded-full transition duration-150 ease-in-out absolute left-4 top-1/2 transform -translate-y-1/2">
                 <i id="toggle-icon" data-lucide="chevrons-left" class="w-6 h-6"></i>
             </button>
 
-            <!-- Toggle Button (Mobile) -->
+           
             <button id="sidebar-toggle-mobile" onclick="toggleSidebar()" class="text-gray-400 hover:text-gray-200 p-2 rounded-full transition duration-150 ease-in-out absolute left-4 top-1/2 transform -translate-y-1/2" style="display: none;">
                 <i data-lucide="menu" class="w-6 h-6"></i>
             </button>
             
-            <!-- Header Title -->
+          
             <h1 class="text-lg font-medium text-gray-300">Healthguru: Your AI Wellness Companion</h1>
             
         </header>
 
-        <!-- CHAT DISPLAY AREA -->
+     
         <div class="flex-grow overflow-y-auto w-full flex justify-center">
             <div id="chat-window" class="p-6 space-y-8 max-w-4xl w-full">
                 
-                <!-- Greeting Message (Only shows if no messages exist) -->
                 {% if not messages %}
                 <div class="flex justify-start">
                     <div class="message-bubble-ai p-4 text-base shadow-md">
@@ -242,7 +221,7 @@
                 </div>
                 {% endif %}
 
-                <!-- Existing Messages -->
+                
                 {% for message in messages %}
                     {% if message.role == 'user' %}
                         <div class="flex justify-end">
@@ -254,13 +233,12 @@
                         <div class="flex justify-start">
                             <div class="message-bubble-ai p-4 text-base shadow-md markdown-content" 
                                  data-raw-content="{{ message.parts[0].text | escape }}">
-                                <!-- Content will be populated by JS -->
+                               
                             </div>
                         </div>
                     {% endif %}
                 {% endfor %}
 
-                <!-- Loading Indicator -->
                 <div id="loading-indicator" class="flex justify-start hidden">
                     <div class="message-bubble-ai p-4">
                         <div class="flex items-center space-x-2">
@@ -272,13 +250,12 @@
                     </div>
                 </div>
                 
-                <!-- Scroll Anchor -->
+             
                 <div id="scroll-anchor" class="h-1"></div>
             </div>
         </div>
 
 
-        <!-- INPUT FOOTER -->
         <div class="sticky bottom-0 bg-gradient-to-t from-gray-950 to-transparent pt-8 pb-4">
             <div class="max-w-4xl mx-auto flex space-x-3 items-center p-4 bg-gray-900/90 rounded-2xl shadow-2xl border border-gray-800">
                 <input 
@@ -301,7 +278,7 @@
 
     </div>
 
-    <!-- 3. CONTEXT MENU (Hidden by default) -->
+  
     <div id="context-menu" data-chat-id="">
         <div id="delete-option" class="context-item text-red-400 hover:text-red-300" onclick="showDeleteConfirmation()">
             <i data-lucide="trash-2" class="w-4 h-4 mr-3"></i>
@@ -309,7 +286,7 @@
         </div>
     </div>
 
-    <!-- 4. CONFIRMATION MODAL -->
+
     <div id="confirmation-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
         <div class="bg-gray-900 p-8 rounded-xl shadow-2xl max-w-sm w-full border border-red-500/50">
             <h3 class="text-2xl font-bold mb-4 text-red-400 flex items-center space-x-2">
@@ -325,21 +302,19 @@
     </div>
 
 
-    <!-- ================================================================= -->
-    <!-- JAVASCRIPT LOGIC -->
-    <!-- ================================================================= -->
+
     <script>
-        // Initialize Lucide Icons
+
         lucide.createIcons();
         
-        // Configure marked to render markdown safely
+    
         marked.setOptions({
-            gfm: true, // Use GitHub flavored markdown
-            breaks: true, // Use <br> for single newlines
-            sanitize: true, // Sanitize the output HTML
+            gfm: true, 
+            breaks: true, 
+            sanitize: true, 
         });
 
-        // --- Global DOM Elements ---
+ 
         const chatWindow = document.getElementById('chat-window');
         const userInput = document.getElementById('user-input');
         const sendButton = document.getElementById('send-button');
@@ -351,20 +326,16 @@
         const toggleButtonDesktop = document.getElementById('sidebar-toggle-desktop');
         const toggleButtonMobile = document.getElementById('sidebar-toggle-mobile');
         
-        // --- Context Menu Elements ---
         const contextMenu = document.getElementById('context-menu');
         const deleteModal = document.getElementById('confirmation-modal');
         let currentContextMenuChatId = null;
 
-        // --- State Variables ---
         let isMobile = window.innerWidth <= 768;
         let isSidebarOpen = !isMobile;
 
-        // --- Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
             initializeLayout();
             window.addEventListener('resize', handleResize);
-            // Parse all existing AI messages on page load
             document.querySelectorAll('.markdown-content').forEach(el => {
                 const rawContent = el.getAttribute('data-raw-content');
                 if (rawContent) {
@@ -378,22 +349,18 @@
             resetInputAndScroll(); 
         });
         
-        // Close context menu on any click outside
         document.addEventListener('click', (e) => {
             if (!contextMenu.contains(e.target)) {
                 contextMenu.style.display = 'none';
             }
         });
         
-        // Prevent context menu from showing standard browser menu
         contextMenu.addEventListener('contextmenu', (e) => e.preventDefault());
 
 
-        // --- Context Menu Logic ---
         function setupChatHistoryContextMenu() {
             const historyItems = document.querySelectorAll('.chat-history-item');
             historyItems.forEach(item => {
-                // Ensure only one right-click listener is attached
                 item.removeEventListener('contextmenu', handleContextMenu);
                 item.addEventListener('contextmenu', handleContextMenu);
             });
@@ -401,12 +368,10 @@
         
         function handleContextMenu(e) {
             e.preventDefault();
-            e.stopPropagation(); // Prevent the body click listener
-            
+            e.stopPropagation(); 
             const item = e.currentTarget;
             currentContextMenuChatId = item.dataset.chatId;
             
-            // Position and display the custom menu
             contextMenu.style.left = `${e.clientX}px`;
             contextMenu.style.top = `${e.clientY}px`;
             contextMenu.style.display = 'block';
@@ -437,7 +402,6 @@
                 const data = await response.json();
 
                 if (response.ok && data.success) {
-                    // Redirect to the URL provided by the server
                     window.location.href = data.redirect_url;
                 } else {
                     console.error('Failed to delete chat:', data.error);
@@ -450,7 +414,6 @@
         }
 
 
-        // --- Layout and UI Toggle Logic ---
 
         function initializeLayout() {
             if (isMobile) {
@@ -469,12 +432,12 @@
             const wasMobile = isMobile;
             isMobile = window.innerWidth <= 768;
 
-            if (wasMobile !== isMobile) { // Only run if breakpoint is crossed
-                if (!isMobile) { // To Desktop
+            if (wasMobile !== isMobile) { 
+                if (!isMobile) {
                     isSidebarOpen = true;
                     historySidebar.classList.remove('collapsed', 'active');
                     bodyContainer.classList.remove('sidebar-collapsed');
-                } else { // To Mobile
+                } else { 
                     isSidebarOpen = false;
                     historySidebar.classList.add('collapsed');
                     historySidebar.classList.remove('active');
@@ -491,15 +454,13 @@
         }
 
         function updateToggleIcon() {
-            if (isMobile) return; // Mobile uses a static menu icon
+            if (isMobile) return; 
             
-            // Update Lucide icon on desktop
             const iconName = isSidebarOpen ? 'chevrons-left' : 'chevrons-right';
             const iconElement = document.createElement('i');
             iconElement.setAttribute('data-lucide', iconName);
             iconElement.className = 'w-6 h-6';
             
-            // Handle replacing the existing icon
             const currentToggleIcon = document.getElementById('toggle-icon');
             if (currentToggleIcon && currentToggleIcon.parentNode) {
                 currentToggleIcon.parentNode.replaceChild(iconElement, currentToggleIcon);
@@ -512,7 +473,6 @@
                 }
             }
 
-            // Re-create all Lucide icons
             lucide.createIcons();
         }
 
@@ -521,10 +481,8 @@
             isSidebarOpen = !isSidebarOpen;
             
             if (isMobile) {
-                // Mobile: toggle visibility
                 historySidebar.classList.toggle('active');
             } else {
-                // Desktop: slide effect
                 historySidebar.classList.toggle('collapsed');
                 bodyContainer.classList.toggle('sidebar-collapsed');
             }
@@ -548,14 +506,12 @@
             userInput.disabled = true;
             sendButton.disabled = true;
             sendButton.classList.add('opacity-50', 'cursor-not-allowed');
-            // Ensure loading indicator is placed at the very end
             chatWindow.insertBefore(loadingIndicator, scrollAnchor); 
             loadingIndicator.classList.remove('hidden');
             scrollToBottom();
         }
 
 
-        // --- Core Chat Logic ---
 
         async function sendMessage() {
             const message = userInput.value.trim();
@@ -565,11 +521,9 @@
             const chatIdIndex = pathParts.indexOf('chat') + 1;
             const currentChatId = (chatIdIndex > 0 && pathParts[chatIdIndex]) ? pathParts[chatIdIndex] : '{{ current_chat_id }}';
             
-            // 1. Append user message
             appendMessage(message, 'user');
             userInput.value = '';
             
-            // 2. Disable input and show loader
             disableInputAndScroll();
             
             try {
@@ -582,12 +536,10 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    // 3. Hide loader and append AI message
                     loadingIndicator.classList.add('hidden');
                     appendMessage(data.response, 'model');
 
-                    // If this was the first message of a new chat, the server
-                    // created a new chat ID. We must redirect to keep the URL in sync.
+                    
                     if (data.chat_id !== currentChatId) {
                         window.location.href = '/chat/' + data.chat_id;
                         return;
@@ -595,7 +547,6 @@
 
                 } else {
                     loadingIndicator.classList.add('hidden');
-                    // Use a specific error message style
                     appendMessage(`Error: ${data.error || 'Could not get response from AI.'}`, 'error');
                 }
 
@@ -604,7 +555,6 @@
                 loadingIndicator.classList.add('hidden');
                 appendMessage('An unexpected network error occurred.', 'error');
             } finally {
-                // 4. Ensure the input is reset and re-enabled here
                 resetInputAndScroll(); 
             }
         }
@@ -617,7 +567,7 @@
                 messageContainer.className = 'flex justify-end';
                 bubble.className = 'message-bubble-user p-4 text-base shadow-md';
                 bubble.innerText = text; 
-            } else { // model or error
+            } else { 
                 messageContainer.className = 'flex justify-start';
                 bubble.className = 'message-bubble-ai p-4 text-base shadow-md';
                 
@@ -627,17 +577,14 @@
                      bubble.style.borderRadius = '0.5rem';
                      bubble.innerText = text;
                 } else {
-                    // Parse the model's markdown response to HTML
                     bubble.innerHTML = marked.parse(text); 
                     bubble.classList.add('markdown-content');
                 }
             }
 
             messageContainer.appendChild(bubble);
-            // Insert before scroll anchor
             chatWindow.insertBefore(messageContainer, scrollAnchor); 
             
-            // Re-check for new icons 
             lucide.createIcons(); 
         }
 
