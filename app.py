@@ -7,22 +7,15 @@ from google import genai
 from google.genai.errors import APIError
 from dotenv import load_dotenv
 
-# --- Configuration & Initialization ---
 
-# Load environment variables (like FLASK_SECRET_KEY)
-# This handles the "NameError: name 'load_dotenv' is not defined" error
 load_dotenv() 
 
-# Use environment variable for API Key
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 client = genai.Client(api_key=GEMINI_API_KEY)
 
-# Flask App setup
 app = Flask(__name__)
-# IMPORTANT: Never use a weak secret key in production! 
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "a_very_secret_key_for_session")
 
-# --- Helper Functions for Session Management ---
 
 def get_or_create_chat(chat_id=None):
     """
@@ -32,11 +25,9 @@ def get_or_create_chat(chat_id=None):
         session['history'] = {}
 
     if chat_id and chat_id in session['history']:
-        # Load existing chat
         current_chat = session['history'][chat_id]
         return chat_id, current_chat
         
-    # Create new chat
     new_chat_id = str(uuid.uuid4())
     new_chat_session = {
         'id': new_chat_id,
@@ -56,18 +47,14 @@ def get_all_chats_for_sidebar():
     history = session.get('history', {})
     clean_chats = []
     
-    # Use a default minimum datetime for sorting entries that might be malformed
     min_datetime = datetime(MINYEAR, 1, 1).isoformat()
     
     for chat_id, chat_data in history.items():
         if not isinstance(chat_data, dict):
-            continue # Skip malformed, old session data
-        
-        # Ensure essential keys exist on all chat objects
+            continue s
         chat_data['id'] = chat_data.get('id', chat_id)
         chat_data['created_at'] = chat_data.get('created_at', min_datetime)
         
-        # If 'title' is missing or is the default for an empty chat, provide a better default
         if chat_data.get('title') == 'New Chat' and not chat_data.get('messages'):
             chat_data['title'] = 'Untitled Chat'
         elif not chat_data.get('title'):
@@ -75,7 +62,6 @@ def get_all_chats_for_sidebar():
         
         clean_chats.append(chat_data)
 
-    # Sort the clean list by creation time
     sorted_chats = sorted(
         clean_chats, 
         key=lambda x: datetime.fromisoformat(x['created_at']),
@@ -83,7 +69,6 @@ def get_all_chats_for_sidebar():
     )
     return sorted_chats
 
-# --- Routes and Logic ---
 
 @app.route('/', defaults={'chat_id': None})
 @app.route('/chat/<chat_id>')
@@ -92,14 +77,11 @@ def Index(chat_id):
     
     all_history = get_all_chats_for_sidebar()
     
-    # FIX: "New Chat on Refresh" prevention logic
     if chat_id is None:
         if all_history:
-            # If user visits "/" and has history, redirect to the most recent chat
             latest_chat_id = all_history[0]['id']
             return redirect(url_for('Index', chat_id=latest_chat_id))
         else:
-            # If no history exists, create a new one to display (and prevent redirect loop)
             chat_id, _ = get_or_create_chat(None)
             return redirect(url_for('Index', chat_id=chat_id))
             
@@ -129,14 +111,12 @@ def chat():
 
         current_chat_id, current_chat = get_or_create_chat(chat_id)
         
-        # Append user message to the session history
         current_chat['messages'].append({
             'role': 'user', 
             'parts': [{'text': user_message}]
         })
         
-        # Construct the contents list for the API call 
-        # using list comprehension. This fixes the Part.from_text error.
+        
         history_parts = [
             {"role": msg['role'], "parts": msg['parts']} 
             for msg in current_chat['messages']
@@ -149,13 +129,11 @@ def chat():
         )
         
         model_response = response.text
-        # Append model response to the session history
         current_chat['messages'].append({
             'role': 'model', 
             'parts': [{'text': model_response}]
         })
         
-        # Title generation logic: Only run if it's the first turn in a chat that still has the default title
         if current_chat.get('title') in ['New Chat', 'Untitled Chat'] and len(current_chat['messages']) == 2:
             title_response = client.models.generate_content(
                 model='gemini-2.5-flash', 
@@ -163,7 +141,7 @@ def chat():
                     {"role": "user", "parts": [{"text": f"Create a short, three-word maximum, title for this chat topic: '{user_message}'"}]}
                 ]
             )
-            new_title = title_response.text.strip().replace('"', '').replace('**', '').replace('*', '') # Clean up markdown/quotes
+            new_title = title_response.text.strip().replace('"', '').replace('**', '').replace('*', '') 
             current_chat['title'] = new_title if new_title else 'Chat'
 
         session.modified = True
@@ -176,7 +154,6 @@ def chat():
         print(f"Unexpected error: {e}")
         return jsonify(error="An unexpected error occurred."), 500
 
-# --- NEW ROUTE: DELETE CHAT ---
 @app.route('/delete_chat/<chat_id>', methods=['POST'])
 def delete_chat(chat_id):
     """Deletes a chat session from the history."""
@@ -187,11 +164,9 @@ def delete_chat(chat_id):
         all_history = get_all_chats_for_sidebar()
         
         if all_history:
-            # Redirect to the next most recent chat
             redirect_id = all_history[0]['id']
             return jsonify(success=True, redirect_url=url_for('Index', chat_id=redirect_id))
         else:
-            # No chats left, redirect to a clean root path (which will create a new chat)
             return jsonify(success=True, redirect_url=url_for('Index'))
             
     return jsonify(success=False, error="Chat not found"), 404
