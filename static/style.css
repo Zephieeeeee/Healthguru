@@ -1,14 +1,8 @@
-/*
- * Custom styles for the Gemini-inspired theme.
- * Note: Most layout and color styling is now embedded in the HTML using Tailwind.
- */
 
-/* General Reset and Custom Font (Inter is set via HTML link) */
 body {
     transition: background-color 0.3s, color 0.3s;
 }
 
-/* --- Loading Indicator --- */
 .message-bubble {
     position: relative;
 }
@@ -25,7 +19,6 @@ body {
     100% { content: '...'; }
 }
 
-/* --- Scrollbar Styling (Optional, for modern browsers) --- */
 #chat-box::-webkit-scrollbar,
 .sidebar-history::-webkit-scrollbar,
 #message-input::-webkit-scrollbar {
