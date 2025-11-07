@@ -18,9 +18,7 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY", "a_very_secret_key_for_sessi
 
 
 def get_or_create_chat(chat_id=None):
-    """
-    Retrieves a chat session from Flask session or creates a new one.
-    """
+   
     if 'history' not in session:
         session['history'] = {}
 
@@ -40,10 +38,7 @@ def get_or_create_chat(chat_id=None):
     return new_chat_id, new_chat_session
 
 def get_all_chats_for_sidebar():
-    """
-    Returns all chats, sorted reverse chronologically, 
-    ensuring all chat objects are valid and have a title.
-    """
+    
     history = session.get('history', {})
     clean_chats = []
     
